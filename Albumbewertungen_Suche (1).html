@@ -1,0 +1,946 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Album-Bewertungen durchsuchen</title>
+<style>
+:root { color-scheme: light dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 22px; font: 14px/1.5 system-ui, sans-serif; }
+main { max-width: 1200px; margin: 0 auto; }
+h1 { font-size: 1.25rem; margin: 0 0 12px; }
+.controls { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+input { flex: 1; min-width: 0; padding: 12px 14px; border: 1px solid #8888;
+  border-radius: 8px; background: transparent; color: inherit; font: inherit; }
+button { padding: 11px 14px; border: 1px solid #8888; border-radius: 8px;
+  background: transparent; color: inherit; font: inherit; cursor: pointer; }
+#count { opacity: .7; font-size: 12px; margin: 8px 0 12px; }
+.table-wrap { overflow-x: auto; border: 1px solid #8885; border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; min-width: 650px; }
+th, td { text-align: left; padding: 9px 11px; border-bottom: 1px solid #8884; }
+th { position: sticky; top: 0; background: Canvas; }
+tbody tr:hover { background: color-mix(in srgb, CanvasText 6%, Canvas); }
+td:nth-child(3), td:nth-child(5) { white-space: nowrap; }
+@media (max-width: 560px) {
+  body { padding: 12px; }
+  .controls { align-items: stretch; flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Album-Bewertungen</h1>
+<div class="controls">
+  <input id="search" type="search"
+    placeholder="Album, Artist, Bewertung, bester Song oder Jahr suchen…"
+    aria-label="Tabelle durchsuchen">
+  <button id="reset" type="button">Zurücksetzen</button>
+</div>
+<div id="count" aria-live="polite"></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Album</th><th>Artist</th><th>Bewertung</th><th>Bester Song</th><th>Jahr</th></tr></thead>
+<tbody id="rows">
+<tr><td>Fashionably Late</td><td>Falling In Reverse</td><td>0,0</td><td>Keep Holding On</td><td>2013</td></tr>
+<tr><td>ANALyse</td><td>Juliensblog</td><td>0,0</td><td>GIB IHM</td><td>2013</td></tr>
+<tr><td>Watch Me</td><td>Ronnie Radke</td><td>0,0</td><td>/</td><td>2013</td></tr>
+<tr><td>OWO What&#x27;s This?</td><td>Hentai Dude</td><td>0,0</td><td>/</td><td>2015</td></tr>
+<tr><td>Dissresepekt</td><td>Cashisclay, Twizzy &amp; KuchenTV</td><td>0,0</td><td>/</td><td>2025</td></tr>
+<tr><td>$TARFACE</td><td>$TARFACE</td><td>0,0</td><td>/</td><td>2026</td></tr>
+<tr><td>Dusta nd Silence</td><td>The Velvet Sundown</td><td>0,0</td><td>/</td><td>2026</td></tr>
+<tr><td>The Things I Didn&#x27;t Say</td><td>Xania Monet</td><td>0,0</td><td>/</td><td>2026</td></tr>
+<tr><td>PHANTASY VALLEY</td><td>absent &amp; Saint Purple</td><td>0,1</td><td>2017</td><td>2019</td></tr>
+<tr><td>Popular Monster</td><td>Falling In Reverse</td><td>0,1</td><td>Bad Guy</td><td>2024</td></tr>
+<tr><td>CHEFMUSIK 2</td><td>JULIEN BOSS</td><td>0,1</td><td>Asche</td><td>2024</td></tr>
+<tr><td>CHEFMUSIK.</td><td>JULIEN BOSS</td><td>0,2</td><td>Outro</td><td>2023</td></tr>
+<tr><td>Anger Management</td><td>Dax</td><td>0,2</td><td>/</td><td>2026</td></tr>
+<tr><td>TOTAL XANARCHY</td><td>Lil Xan</td><td>0,3</td><td>/</td><td>2018</td></tr>
+<tr><td>SCHLAU ABER BLOND</td><td>Shirin David</td><td>0,3</td><td>wenn ich dich seh</td><td>2025</td></tr>
+<tr><td>The Big Day</td><td>Chance the Rapper</td><td>0,4</td><td>Town On The Hill</td><td>2019</td></tr>
+<tr><td>ASZENDENT BITCH</td><td>Ikkimel</td><td>0,4</td><td>HAMPELMANN</td><td>2023</td></tr>
+<tr><td>SEDITION</td><td>Nine Vicious</td><td>0,4</td><td>Casino</td><td>2026</td></tr>
+<tr><td>Kush Haze &amp; Heartbreaks</td><td>Sin Davis</td><td>0,5</td><td>Cobain</td><td>2019</td></tr>
+<tr><td>Welcome To The Madhouse</td><td>Tones and I</td><td>0,5</td><td>/</td><td>2021</td></tr>
+<tr><td>Pretty Privilege</td><td>ZAH1DE</td><td>0,5</td><td>Mona Lisa Motion</td><td>2025</td></tr>
+<tr><td>POPPSTAR</td><td>Ikkimel</td><td>0,5</td><td>WHO&#x27;S THAT</td><td>2026</td></tr>
+<tr><td>Vultures 2</td><td>¥$</td><td>0,6</td><td>FIELD TRIP</td><td>2024</td></tr>
+<tr><td>M.I.7</td><td>M.I.A.</td><td>0,7</td><td>TRUMPET 7</td><td>2026</td></tr>
+<tr><td>MAID OF HONOUR</td><td>Drake</td><td>0,7</td><td></td><td></td></tr>
+<tr><td>Angelic 2 the Core</td><td>Corey Feldman</td><td>0,8</td><td>Ascension Millennium</td><td>2016</td></tr>
+<tr><td>HABIBTI</td><td>Drake</td><td>0,9</td><td></td><td></td></tr>
+<tr><td>3000 X Lila</td><td>Sin Davis</td><td>1,0</td><td>Hell of a Night</td><td>2019</td></tr>
+<tr><td>Y2K!</td><td>Ice Spice</td><td>1,0</td><td>Did It First</td><td>2024</td></tr>
+<tr><td>Yo Favorite Trappa Favorite   Rappa</td><td>Sexyy Red</td><td>1,0</td><td>All Da Hoes</td><td>2026</td></tr>
+<tr><td>Just Like You</td><td>Falling In Reverse</td><td>1,1</td><td>Chemical Prisoner</td><td>2015</td></tr>
+<tr><td>Wavy XXX 2</td><td>Halfcastromeo</td><td>1,1</td><td>Facts</td><td>2019</td></tr>
+<tr><td>The Real Me</td><td>Future</td><td>1,2</td><td>Fukk A Interview</td><td>2026</td></tr>
+<tr><td>X</td><td>Ken Carson</td><td>1,3</td><td>MDMA</td><td>2022</td></tr>
+<tr><td>ARIRANG</td><td>BTS</td><td>1,3</td><td>SWIM</td><td>2026</td></tr>
+<tr><td>Long Way Home</td><td>STELLA LEFTY</td><td>1,3</td><td>Lean In, Kiss Me</td><td>2026</td></tr>
+<tr><td>Tsunami Warning</td><td>YUN MUFASA</td><td>1,5</td><td>Awful Way</td><td>2020</td></tr>
+<tr><td>EGO DEATH</td><td>Sin Davis</td><td>1,5</td><td>SOSA</td><td>2021</td></tr>
+<tr><td>TYCOON</td><td>Ty Dolla $ign</td><td>1,6</td><td>HARDER</td><td>2025</td></tr>
+<tr><td>The Drug in Me Is You</td><td>Falling In Reverse</td><td>1,7</td><td>The Drug In Me Is You</td><td>2011</td></tr>
+<tr><td>Finezza</td><td>MaazaKayo</td><td>1,7</td><td>Schweigen ist Gold</td><td>2021</td></tr>
+<tr><td>Aufzug</td><td>Yin Kalle</td><td>1,8</td><td>Plugcall</td><td>2019</td></tr>
+<tr><td>OCTANE</td><td>Don Toliver</td><td>1,8</td><td>E85</td><td>2026</td></tr>
+<tr><td>orange</td><td>01099</td><td>1,9</td><td>Laufen</td><td>2024</td></tr>
+<tr><td>SURREAL</td><td>absent</td><td>2,0</td><td>Sag mir</td><td>2018</td></tr>
+<tr><td>Blaue Stunden</td><td>01099</td><td>2,0</td><td>Anders</td><td>2023</td></tr>
+<tr><td>HOPE</td><td>NF</td><td>2,0</td><td>HOPE</td><td>2023</td></tr>
+<tr><td>ALBUM</td><td>Yuno Miles</td><td>2,0</td><td>Bobo&#x27;s Chicken</td><td>2025</td></tr>
+<tr><td>Michael</td><td>Michael Jackson</td><td>2,1</td><td>Behind the Mask</td><td>2010</td></tr>
+<tr><td>Kalle allein zu Haus</td><td>Yin Kalle</td><td>2,1</td><td>Yum Yum</td><td>2020</td></tr>
+<tr><td>Toy</td><td>David Bowie</td><td>2,1</td><td></td><td>2021</td></tr>
+<tr><td>Mad</td><td>Halfcastromeo</td><td>2,2</td><td>I Don&#x27;t Miss U</td><td>2020</td></tr>
+<tr><td>Honestly, Nevermind</td><td>Drake</td><td>2,2</td><td></td><td>2022</td></tr>
+<tr><td>Alles grün</td><td>GReeeN</td><td>2,3</td><td>Blauer Planet</td><td>2013</td></tr>
+<tr><td>American Hills</td><td>CKK</td><td>2,4</td><td>666</td><td>2020</td></tr>
+<tr><td>Hybrid</td><td>GReeeN, Patwah &amp; Hägi</td><td>2,4</td><td>Barfuss</td><td>2021</td></tr>
+<tr><td>On The Strength</td><td>Grandmaster Flash &amp; The Furious Five</td><td>2,5</td><td>On the Strength</td><td>1988</td></tr>
+<tr><td>CYCLE</td><td>absent</td><td>2,5</td><td>independent (ft. Junger Broh)</td><td>2020</td></tr>
+<tr><td>Zuhältertape, Vol. 5</td><td>Kollegah</td><td>2,5</td><td>Rotlichtsonate</td><td>2021</td></tr>
+<tr><td>Les</td><td>Max Huettl</td><td>2,5</td><td>Ich Will Mehr</td><td>2021</td></tr>
+<tr><td>THERAPY VALLEY</td><td>absent &amp; Saint Purple</td><td>2,5</td><td>So Viele</td><td>2024</td></tr>
+<tr><td>ICEMAN</td><td>Drake</td><td>2,5</td><td></td><td>2026</td></tr>
+<tr><td>King of the Castle</td><td>Halfcastromeo</td><td>2,5</td><td>Change</td><td>2026</td></tr>
+<tr><td>Prestige</td><td>Neo Unleashed</td><td>2,6</td><td>Dimension</td><td>2018</td></tr>
+<tr><td>World Diggson</td><td>Johnny Diggson</td><td>2,6</td><td>Fallen</td><td>2019</td></tr>
+<tr><td>Kush Haze &amp; Heartbreaks 2</td><td>Sin Davis</td><td>2,6</td><td>Curtis</td><td>2022</td></tr>
+<tr><td>Escape Plan</td><td>2Scratch</td><td>2,6</td><td>ADHD.</td><td>2023</td></tr>
+<tr><td>Kinder der Nacht</td><td>01099</td><td>2,6</td><td>Kinder der Nacht</td><td>2025</td></tr>
+<tr><td>$ome $exy $ongs 4 U</td><td>PARTYNEXTDOOR &amp; Drake</td><td>2,6</td><td></td><td>2025</td></tr>
+<tr><td>Love Drugs and Suicide</td><td>LEX</td><td>2,7</td><td>Horrible</td><td>2020</td></tr>
+<tr><td>Certified Lover Boy</td><td>Drake</td><td>2,7</td><td></td><td>2021</td></tr>
+<tr><td>Quintana</td><td>Halfcastromeo</td><td>2,7</td><td>Ibiza</td><td>2022</td></tr>
+<tr><td>DIAMONDS</td><td>Lil Peep</td><td>2,7</td><td>IDGAF 2</td><td>2023</td></tr>
+<tr><td>Kippe Vor Deiner Tür</td><td>Max Huettl</td><td>2,7</td><td>Lass Mich Fallen</td><td>2023</td></tr>
+<tr><td>?</td><td>XXXTENTACION</td><td>2,8</td><td>changes</td><td>2018</td></tr>
+<tr><td>PAGES</td><td>absent</td><td>2,8</td><td>AUGEN</td><td>2020</td></tr>
+<tr><td>Spritziges Gebäck</td><td>Herr Kuchen</td><td>2,8</td><td>Kalendersprüche</td><td>2021</td></tr>
+<tr><td>Vergessenes Königreich</td><td>GReeeN</td><td>2,9</td><td>Wunderschönes Leben</td><td>2015</td></tr>
+<tr><td>HELLBOY</td><td>Lil Peep</td><td>2,9</td><td>drive by</td><td>2016</td></tr>
+<tr><td>Phase 4: The Final Chapter</td><td>$atori Zoom</td><td>2,9</td><td>DAMAGE</td><td>2019</td></tr>
+<tr><td>DONDA 2</td><td>Kanye West</td><td>2,9</td><td>BROKEN ROAD</td><td>2022</td></tr>
+<tr><td>denk mal drüber nach…</td><td>Ski Aggu</td><td>2,9</td><td>Friesenjung</td><td>2023</td></tr>
+<tr><td>FOTZE</td><td>Ikkimel</td><td>2,9</td><td>AMENA</td><td>2025</td></tr>
+<tr><td>REAL MUSIC</td><td>t-low</td><td>2,9</td><td>SORRY MAMA</td><td>2025</td></tr>
+<tr><td>17</td><td>XXXTENTACION</td><td>3,0</td><td>Depression &amp; Obsession</td><td>2017</td></tr>
+<tr><td>Emotional World</td><td>Sin Davis</td><td>3,0</td><td>Fav Drug</td><td>2020</td></tr>
+<tr><td>Rare Vision 2</td><td>Raresy &amp; Blockboy$</td><td>3,0</td><td>Jogger Lacoste</td><td>2021</td></tr>
+<tr><td>Vultures 1</td><td>¥$</td><td>3,0</td><td>FUK SUMN</td><td>2024</td></tr>
+<tr><td>Tape 24</td><td>Gary Washington</td><td>3,1</td><td>Final Stage</td><td>2016</td></tr>
+<tr><td>Wilmersdorfs Kind</td><td>Ski Aggu</td><td>3,1</td><td>Z0RNIG [2024]</td><td>2024</td></tr>
+<tr><td>The Life of a Showgirl</td><td>Taylor Swift</td><td>3,1</td><td>Elizabeth Taylor</td><td>2025</td></tr>
+<tr><td>Scorpion</td><td>Drake</td><td>3,2</td><td>God&#x27;s Plan</td><td>2018</td></tr>
+<tr><td>Loner Files</td><td>Sin Davis</td><td>3,2</td><td>Gone</td><td>2023</td></tr>
+<tr><td>Mr. Diggson</td><td>Johnny Diggson</td><td>3,3</td><td>Inferno</td><td>2022</td></tr>
+<tr><td>MUSIC</td><td>Playboi Carti</td><td>3,3</td><td>BACKD00R</td><td>2025</td></tr>
+<tr><td>Encore</td><td>Eminem</td><td>3,4</td><td>Mosh</td><td>2004</td></tr>
+<tr><td>THESE DEMONS LAY ME DOWN</td><td>absent</td><td>3,4</td><td>Egal</td><td>2019</td></tr>
+<tr><td>Dark Lane Demos Tapes</td><td>Drake</td><td>3,4</td><td></td><td>2020</td></tr>
+<tr><td>Altbau</td><td>01099</td><td>3,4</td><td>Sportlich</td><td>2022</td></tr>
+<tr><td>bbno$</td><td>bbno$</td><td>3,4</td><td>gigolo</td><td>2025</td></tr>
+<tr><td>Planktonweed Tape</td><td>SpongeBOZZ</td><td>3,5</td><td>Kleinkrimineller</td><td>2015</td></tr>
+<tr><td>xperiment</td><td>Ken Carson</td><td>3,5</td><td>ghost</td><td>2026</td></tr>
+<tr><td>Megadeth</td><td>Megadeth</td><td>3,5</td><td>Tipping Point</td><td>2026</td></tr>
+<tr><td>Wut stoppen</td><td>Deamon</td><td>3,6</td><td>Sense</td><td>2021</td></tr>
+<tr><td>EVERYTHINGS PURPLE 3</td><td>t-low</td><td>3,6</td><td>PTSD SHIT</td><td>2024</td></tr>
+<tr><td>Coming Home</td><td>Falling In Reverse</td><td>3,7</td><td>Superhero</td><td>2017</td></tr>
+<tr><td>Love Songs</td><td>Peter Fox</td><td>3,7</td><td>Zukunft Pink</td><td>2023</td></tr>
+<tr><td>lieder vom leben</td><td>Edo Saiya</td><td>3,7</td><td>lana del rey (feat. absent)</td><td>2024</td></tr>
+<tr><td>luck… or something</td><td>Hilary Duff</td><td>3,7</td><td>Holiday Party</td><td>2026</td></tr>
+<tr><td>Come Over When You&#x27;re Sober,   Pt. 1</td><td>Lil Peep</td><td>3,8</td><td>U Said</td><td>2017</td></tr>
+<tr><td>JESUS IS KING</td><td>Kanye West</td><td>3,8</td><td>Follow God</td><td>2019</td></tr>
+<tr><td>Your Local Finesser</td><td>65Goonz</td><td>3,8</td><td>Fresh AF</td><td>2020</td></tr>
+<tr><td>The Car</td><td>Arctic Monkeys</td><td>3,8</td><td>There&#x27;d Better Be A Mirrorball</td><td>2022</td></tr>
+<tr><td>2022 war film gewesen</td><td>Ski Aggu</td><td>3,8</td><td>Partyticker</td><td>2022</td></tr>
+<tr><td>Five Easy Hot Dogs</td><td>Mac DeMarco</td><td>3,8</td><td>Vancouver</td><td>2023</td></tr>
+<tr><td>psykotic</td><td>OsamaSon</td><td>3,8</td><td>guap man</td><td>2025</td></tr>
+<tr><td>Necropalace</td><td>Worm</td><td>3,8</td><td>Necropalace</td><td>2026</td></tr>
+<tr><td>Yellow Submarine</td><td>The Beatles</td><td>3,9</td><td>Hey Bulldog</td><td>1969</td></tr>
+<tr><td>Never Let Me Down</td><td>David Bowie</td><td>3,9</td><td>Day-In Day-Out</td><td>1987</td></tr>
+<tr><td>Get Rich Or Die Tryin&#x27;</td><td>50 Cent</td><td>3,9</td><td>Many Men (Wish Death)</td><td>2003</td></tr>
+<tr><td>Views</td><td>Drake</td><td>3,9</td><td>One Dance</td><td>2016</td></tr>
+<tr><td>Perception</td><td>NF</td><td>3,9</td><td>If You Want Love</td><td>2017</td></tr>
+<tr><td>Yellow Bar Mitzvah</td><td>Sun Diego</td><td>3,9</td><td>Rostov on Don</td><td>2022</td></tr>
+<tr><td>4. Mountain Still Breathing</td><td>Mydreamfever</td><td>3,9</td><td>Track 12</td><td>2026</td></tr>
+<tr><td>Music &amp; Me</td><td>Michael Jackson</td><td>4,0</td><td>All The Things You Are</td><td>1973</td></tr>
+<tr><td>Bossaura</td><td>Kollegah</td><td>4,0</td><td>Bossaura</td><td>2011</td></tr>
+<tr><td>What a Time to Be Alive</td><td>Drake &amp; Future</td><td>4,0</td><td>Diamonds Dancing</td><td>2015</td></tr>
+<tr><td>Goon City</td><td>65Goonz, Polo65 &amp; OG Raijk</td><td>4,0</td><td>Goon Forever</td><td>2022</td></tr>
+<tr><td>TEKKNO</td><td>Electric Callboy</td><td>4,0</td><td>Pump It</td><td>2022</td></tr>
+<tr><td>LIIA</td><td>Kidnfinity</td><td>4,0</td><td>FREEFALL</td><td>2023</td></tr>
+<tr><td>All Set The Bone</td><td>Greg Freeman</td><td>4,0</td><td>Indu</td><td>2026</td></tr>
+<tr><td>Trappin&#x27; Before Rappin&#x27;</td><td>65Goonz</td><td>4,1</td><td>Ballin</td><td>2021</td></tr>
+<tr><td>CLOUDS (THE MIXTAPE)</td><td>NF</td><td>4,1</td><td>STORY</td><td>2021</td></tr>
+<tr><td>THESE DEMONS ARE MY ONLY OPPS</td><td>absent</td><td>4,1</td><td>Opps</td><td>2022</td></tr>
+<tr><td>GO TIME</td><td>2LADE</td><td>4,1</td><td>Me Against The World</td><td>2023</td></tr>
+<tr><td>You&#x27;re Gonna Need a Little   Music</td><td>Yard Act</td><td>4,1</td><td>Redeemer</td><td>2026</td></tr>
+<tr><td>Magazine</td><td>YNWH Nailgun</td><td>4,1</td><td>Ghost of Love</td><td>2026</td></tr>
+<tr><td>David Bowie</td><td>David Bowie</td><td>4,2</td><td>Love You Till Tuesday</td><td>1967</td></tr>
+<tr><td>Ben</td><td>Michael Jackson</td><td>4,2</td><td>Everybody&#x27;s Somebody&#x27;s Fool</td><td>1972</td></tr>
+<tr><td>LIA</td><td>Kidnfinity</td><td>4,2</td><td>SAD SONGS</td><td>2022</td></tr>
+<tr><td>CHROME CLOUDS</td><td>absent</td><td>4,2</td><td>HARD!</td><td>2023</td></tr>
+<tr><td>Ultraviolet Parasite</td><td>Frontierer</td><td>4,2</td><td>Picturesque</td><td>2026</td></tr>
+<tr><td>Piss In The Wind</td><td>Joji</td><td>4,2</td><td>PIXELATED KISSES</td><td>2026</td></tr>
+<tr><td>Sexistential</td><td>Robyn</td><td>4,2</td><td>Really Real</td><td>2026</td></tr>
+<tr><td>In Search of A Revival</td><td>The Olympians</td><td>4,2</td><td>Hollywood Cold</td><td>2026</td></tr>
+<tr><td>You&#x27;re Under Arrest</td><td>Miles Davis</td><td>4,3</td><td>Human Nature</td><td>1985</td></tr>
+<tr><td>AM</td><td>Arctic Monkeys</td><td>4,3</td><td>Do I Wanna Know?</td><td>2013</td></tr>
+<tr><td>EVERYBODY&#x27;S EVERYTHING</td><td>Lil Peep</td><td>4,3</td><td>When I Lie</td><td>2019</td></tr>
+<tr><td>Highland</td><td>GReeeN</td><td>4,3</td><td>Leben</td><td>2020</td></tr>
+<tr><td>Das Verlorene Album</td><td>GReeeN</td><td>4,3</td><td>Good Life</td><td>2021</td></tr>
+<tr><td>SOUR</td><td>Olivia Rodrigo</td><td>4,3</td><td>brutal</td><td>2021</td></tr>
+<tr><td>PANIC MOTEL</td><td>absent</td><td>4,3</td><td>HERZURÜCK</td><td>2023</td></tr>
+<tr><td>For All the Dogs</td><td>Drake</td><td>4,3</td><td></td><td>2023</td></tr>
+<tr><td>A\*POP</td><td>Tyla</td><td>4,3</td><td>IS IT LOVE</td><td>2026</td></tr>
+<tr><td>Forever, Michael</td><td>Michael Jackson</td><td>4,4</td><td>One Day In Your Life</td><td>1975</td></tr>
+<tr><td>More Life</td><td>Drake</td><td>4,4</td><td>Passionfruit</td><td>2017</td></tr>
+<tr><td>The Search</td><td>NF</td><td>4,4</td><td>When I Grow Up</td><td>2019</td></tr>
+<tr><td>Rags To Riches</td><td>LEX</td><td>4,4</td><td>20k Uhr</td><td>2023</td></tr>
+<tr><td>PURPUR MIXTAPE</td><td>Kidnfinity</td><td>4,4</td><td>WTF IS WRONG WITH U?</td><td>2024</td></tr>
+<tr><td>Cold 2 The Touch</td><td>Angel Du$t</td><td>4,4</td><td>Jesus Head</td><td>2026</td></tr>
+<tr><td>Dying Is Your Latest Fashion</td><td>Escape the Fate</td><td>4,5</td><td>My Apocalypse</td><td>2006</td></tr>
+<tr><td>I Want to Die in New Orleans</td><td>$uicideboy$</td><td>4,5</td><td>10,000 Degrees</td><td>2018</td></tr>
+<tr><td>Thanks But Now It&#x27;s My Turn</td><td>Gary Washington</td><td>4,5</td><td>Bleib Daheim</td><td>2018</td></tr>
+<tr><td>Twelve Carat Toothache</td><td>Post Malone</td><td>4,5</td><td>Reputation</td><td>2022</td></tr>
+<tr><td>traence</td><td>Souly</td><td>4,5</td><td>m.p.x</td><td>2025</td></tr>
+<tr><td>XXXXX</td><td>Arca</td><td>4,5</td><td>Fxck</td><td>2026</td></tr>
+<tr><td>I Know Too Much</td><td>Ellie Goulding</td><td>4,5</td><td>For Your Entertaiment</td><td>2026</td></tr>
+<tr><td>Beatles For Sale</td><td>The Beatles</td><td>4,6</td><td>No Reply</td><td>1964</td></tr>
+<tr><td>Got to Be There</td><td>Michael Jackson</td><td>4,6</td><td>Ain&#x27;t No Sunshine</td><td>1972</td></tr>
+<tr><td>MANN MIT DER BRILLE</td><td>2LADE</td><td>4,6</td><td>Daywalker</td><td>2022</td></tr>
+<tr><td>Icon</td><td>Brent Faiyaz</td><td>4,6</td><td>pure fantasy.</td><td>2026</td></tr>
+<tr><td>Who Loves the Sun</td><td>Chat Pile</td><td>4,6</td><td>Same Rules</td><td>2026</td></tr>
+<tr><td>molly picture</td><td>God Of War, They Are Gutting a Body of Water &amp; Hooky</td><td>4,6</td><td>Gorgeouses apartment</td><td>2026</td></tr>
+<tr><td>Pablo Honey</td><td>Radiohead</td><td>4,7</td><td>Prove Yourself</td><td>1993</td></tr>
+<tr><td>crybaby</td><td>Lil Peep</td><td>4,7</td><td>ghost girl</td><td>2016</td></tr>
+<tr><td>TESTING</td><td>A$AP Rocky</td><td>4,7</td><td>Praise The Lord (Da Shine)</td><td>2018</td></tr>
+<tr><td>Boarding House Reach</td><td>Jack White</td><td>4,7</td><td>Connected By Love</td><td>2018</td></tr>
+<tr><td>Fanfare</td><td>Dorian Electra</td><td>4,7</td><td>anon</td><td>2023</td></tr>
+<tr><td>Elvis Presley</td><td>Elvis Presley</td><td>4,8</td><td>Blue Suede Shoes</td><td>1956</td></tr>
+<tr><td>Tonight</td><td>David Bowie</td><td>4,8</td><td>Loving The Alien</td><td>1984</td></tr>
+<tr><td>Jung, brutal, gutaussehend 3</td><td>Kollegah &amp; Farid Bang</td><td>4,8</td><td>Ave Maria</td><td>2017</td></tr>
+<tr><td>Hollywood&#x27;s Bleeding</td><td>Post Malone</td><td>4,8</td><td>Hollywood&#x27;s Bleeding</td><td>2019</td></tr>
+<tr><td>GUTS</td><td>Olivia Rodrigo</td><td>4,8</td><td>all-american bitch</td><td>2023</td></tr>
+<tr><td>BULLY</td><td>Kanye West</td><td>4,8</td><td>ALL THE LOVE (feat. Andre Troutman)</td><td>2026</td></tr>
+<tr><td>Metamorphoses</td><td>Laika</td><td>4,8</td><td>Ode to a Nightingale</td><td>2026</td></tr>
+<tr><td>Bingo!</td><td>Le Sécurité</td><td>4,8</td><td>Bingo</td><td>2026</td></tr>
+<tr><td>RX</td><td>Rico Nasty</td><td>4,8</td><td>Cupcake</td><td>2026</td></tr>
+<tr><td>Black Tie White Noise</td><td>David Bowie</td><td>4,9</td><td>The Wedding</td><td>1993</td></tr>
+<tr><td>all lights fucked on the hairy   amp drooling</td><td>Godspeed You! Black Emperor</td><td>4,9</td><td>Diminishing Shine</td><td>1994</td></tr>
+<tr><td>The King Of Limbs</td><td>Radiohead</td><td>4,9</td><td>Codex</td><td>2011</td></tr>
+<tr><td>Sea of Worry</td><td>Have A Nice Life</td><td>4,9</td><td>Science Beat</td><td>2019</td></tr>
+<tr><td>Her Loss</td><td>Drake &amp; 21 Savage</td><td>4,9</td><td></td><td>2022</td></tr>
+<tr><td>2K NOSTALGIA</td><td>absent</td><td>4,9</td><td>deja vu</td><td>2024</td></tr>
+<tr><td>The Freezer</td><td>Gezebelle Gaburgably</td><td>4,9</td><td>Pizza Rolls Royce</td><td>2026</td></tr>
+<tr><td>Soliloquy</td><td>Squee</td><td>4,9</td><td>HEARTBREAK</td><td>2026</td></tr>
+<tr><td>Ram Jam</td><td>Ram Jam</td><td>5,0</td><td>Black Betty</td><td>1977</td></tr>
+<tr><td>Guitar</td><td>Mac DeMarco</td><td>5,0</td><td>Home</td><td>2025</td></tr>
+<tr><td>Your Favorite Toy</td><td>Foo Fighters</td><td>5,0</td><td>Window</td><td>2026</td></tr>
+<tr><td>EXPERIMENTAL RAP</td><td>JPEGMAFIA</td><td>5,0</td><td>Burning Hammer</td><td>2026</td></tr>
+<tr><td>Mud</td><td>Remi Wolf</td><td>5,0</td><td>Twiggy</td><td>2026</td></tr>
+<tr><td>With The Beatles</td><td>The Beatles</td><td>5,1</td><td>All My Loving</td><td>1963</td></tr>
+<tr><td>Started From The Bottom /   Krabbenkoke Tape</td><td>SpongeBOZZ</td><td>5,1</td><td>Started From the Buttom</td><td>2017</td></tr>
+<tr><td>von risiken und nebenwirkungen</td><td>Yin Kalle</td><td>5,1</td><td>KitKat Rmx</td><td>2021</td></tr>
+<tr><td>THY KINGDOM COME</td><td>$uicideboy$</td><td>5,1</td><td>Now and at the Hour of Our Death (feat. Bones)</td><td>2025</td></tr>
+<tr><td>Pinups</td><td>David Bowie</td><td>5,2</td><td>Here Comes the Night</td><td>1973</td></tr>
+<tr><td>Call of the Void</td><td>Aytee</td><td>5,2</td><td>Bad Trip</td><td>2021</td></tr>
+<tr><td>The Melodic Blue</td><td>Baby Keem</td><td>5,2</td><td>family ties (with Kendrick Lamar)</td><td>2021</td></tr>
+<tr><td>Kleine große Stadt</td><td>Yin Kalle</td><td>5,2</td><td>Hypnose</td><td>2024</td></tr>
+<tr><td>SORGENKIND</td><td>absent</td><td>5,2</td><td>ausgedacht</td><td>2025</td></tr>
+<tr><td>Vie</td><td>Doja Cat</td><td>5,2</td><td>AAAHH MEN!</td><td>2025</td></tr>
+<tr><td>petal</td><td>Ariana Grande</td><td>5,2</td><td>hate that i made you love me</td><td>2026</td></tr>
+<tr><td>New Self</td><td>The Bobby Lees</td><td>5,2</td><td>Napoleon</td><td>2026</td></tr>
+<tr><td>Miles Davis Quintet</td><td>Miles Davis</td><td>5,3</td><td>Solar</td><td>1954</td></tr>
+<tr><td>Young Americans</td><td>David Bowie</td><td>5,3</td><td>Young Americans</td><td>1975</td></tr>
+<tr><td>Decoy</td><td>Miles Davis</td><td>5,3</td><td>What It Is</td><td>1984</td></tr>
+<tr><td>Universum regelt</td><td>Schmyt</td><td>5,3</td><td>Mach kaputt</td><td>2022</td></tr>
+<tr><td>Come Over When You&#x27;re Sober,   Pt. 2 (og version)</td><td>Lil Peep</td><td>5,3</td><td>Broken Smile (OG Version)</td><td>2023</td></tr>
+<tr><td>Dorian Electra</td><td>Dorian Electra</td><td>5,3</td><td>Hips Don&#x27;t Lie</td><td>2026</td></tr>
+<tr><td>POMPEII // UTILITY</td><td>Earl Sweatshirt, MIKE &amp; Surf Gang</td><td>5,3</td><td>AOK</td><td>2026</td></tr>
+<tr><td>Caminhos de Água</td><td>Kaátaìra</td><td>5,3</td><td>Caminhos de Água</td><td>2026</td></tr>
+<tr><td>FACE OF THE 5</td><td>okgutta</td><td>5,3</td><td>BELLY OF THE BEAST</td><td>2026</td></tr>
+<tr><td>Miles Davis With Sonny Rollins</td><td>Miles Davis &amp; Sonny Rollins</td><td>5,4</td><td>Oleo</td><td>1954</td></tr>
+<tr><td>KULT</td><td>Boondawg</td><td>5,4</td><td>TONY STARK</td><td>2024</td></tr>
+<tr><td>Some Like It Hot</td><td>bar italia</td><td>5,4</td><td>rooster</td><td>2025</td></tr>
+<tr><td>Miles Davis All Stars, Vol. 1</td><td>Miles Davis</td><td>5,5</td><td>Bag&#x27;s Groove</td><td>1955</td></tr>
+<tr><td>Thank Me Later</td><td>Drake</td><td>5,5</td><td>Light Up</td><td>2010</td></tr>
+<tr><td>Collection II</td><td>Devilish Trio</td><td>5,5</td><td>New World (Baker)</td><td>2018</td></tr>
+<tr><td>Flamboyant</td><td>Dorian Electra</td><td>5,5</td><td>Adam &amp; Steve</td><td>2019</td></tr>
+<tr><td>Modern Life Is Lonely</td><td>Holding Absence</td><td>5,5</td><td>Modern Life Is Lonely</td><td>2026</td></tr>
+<tr><td>SweetFace Killah</td><td>Infinite Coles</td><td>5,5</td><td>BGM</td><td>2026</td></tr>
+<tr><td>The Wow! Signal</td><td>Muse</td><td>5,5</td><td>The Dark Forest</td><td>2026</td></tr>
+<tr><td>&lt;10&gt;&lt;</td><td>Petalbyte</td><td>5,5</td><td>this song found you - album ver.</td><td>2026</td></tr>
+<tr><td>PERDIENDO RASGOS ADOLESCENTES</td><td>Swaggerboyz</td><td>5,5</td><td>BUSCANDO</td><td>2026</td></tr>
+<tr><td>No Bad Memories</td><td>The Avalanches</td><td>5,5</td><td>Together</td><td>2026</td></tr>
+<tr><td>My Liver Will Handle What My   Heart Can&#x27;t</td><td>$uicideboy$</td><td>5,6</td><td>Kill Yourself (Part III)</td><td>2015</td></tr>
+<tr><td>Smaragd</td><td>GReeeN</td><td>5,6</td><td>Autostrada</td><td>2019</td></tr>
+<tr><td>SACHEN DIE ICH MEINE</td><td>absent &amp; Young Lime</td><td>5,6</td><td>nur ich selber interlude</td><td>2024</td></tr>
+<tr><td>Miles Davis All Stars, Vol. 2</td><td>Miles Davis</td><td>5,7</td><td>Bemsha Swing</td><td>1955</td></tr>
+<tr><td>Tutu</td><td>Miles Davis</td><td>5,7</td><td>Perfect Way</td><td>1986</td></tr>
+<tr><td>&#x27;hours…&#x27;</td><td>David Bowie</td><td>5,7</td><td>If I&#x27;m Dreaming My Life</td><td>1999</td></tr>
+<tr><td>Gemini Rights</td><td>Steve Lacy</td><td>5,7</td><td>Mercury</td><td>2022</td></tr>
+<tr><td>Smoochies</td><td>Ashnikko</td><td>5,7</td><td>It Girl</td><td>2025</td></tr>
+<tr><td>God Save The Gun</td><td>Militarie Gun</td><td>5,7</td><td>God Owes Me Money</td><td>2025</td></tr>
+<tr><td>Detour</td><td>Kim Petras</td><td>5,7</td><td>Detour</td><td>2026</td></tr>
+<tr><td>HALO</td><td>Tiffany Day</td><td>5,7</td><td>BREAKUP</td><td>2026</td></tr>
+<tr><td>Modern Jazz Trumpets</td><td>Fats Navarro, Miles Davis, Dizzy Gillespie &amp; kenny Dorham</td><td>5,8</td><td>Thinking of You</td><td>1951</td></tr>
+<tr><td>XSCAPE</td><td>Michael Jackson</td><td>5,8</td><td>Loving You</td><td>2014</td></tr>
+<tr><td>watchmeburn</td><td>Duzoe</td><td>5,8</td><td>FRANCAISE</td><td>2021</td></tr>
+<tr><td>Heaven knows</td><td>PinkPantheress</td><td>5,8</td><td>Capable of love</td><td>2023</td></tr>
+<tr><td>THY WILL BE DONE</td><td>$uicideboy$</td><td>5,8</td><td>Leviticus</td><td>2025</td></tr>
+<tr><td>All Systems Are Lying</td><td>Soulwax</td><td>5,8</td><td>Hot Like Sahara</td><td>2025</td></tr>
+<tr><td>Day and Night</td><td>Carly Rae Jepsen</td><td>5,8</td><td>Amalfi Coast</td><td>2026</td></tr>
+<tr><td>Nothing&#x27;s About to Happen to   Me</td><td>Mitski</td><td>5,8</td><td>Where&#x27;s My Phone?</td><td>2026</td></tr>
+<tr><td>emotional junglist</td><td>Nia Archives</td><td>5,8</td><td>Boys In Blue</td><td>2026</td></tr>
+<tr><td>Young Man with a Horn</td><td>Miles Davis</td><td>5,9</td><td>Dear Old Stockholm</td><td>1953</td></tr>
+<tr><td>Nobody&#x27;s Daughter</td><td>Hole</td><td>5,9</td><td>Skinny Little Bitch</td><td>2010</td></tr>
+<tr><td>Here Comes the Cowboy</td><td>Mac DeMarco</td><td>5,9</td><td>Heart To Heart</td><td>2019</td></tr>
+<tr><td>LOVE IS THE LAW</td><td>Love Spells</td><td>5,9</td><td>Crutch</td><td>2026</td></tr>
+<tr><td>FUDGE</td><td>Michael Kiwanuka</td><td>5,9</td><td>Love in My Heart</td><td>2026</td></tr>
+<tr><td>Blue Island</td><td>Ravyn Lenae</td><td>5,9</td><td>Handle</td><td>2026</td></tr>
+<tr><td>Moth Music</td><td>Souly</td><td>5,9</td><td>Motte</td><td>2026</td></tr>
+<tr><td>The Harmonizing Four &amp; God   Will Take Care Of You</td><td>The Harmonizing Four</td><td>6,0</td><td>All Things Are Possible</td><td>1993</td></tr>
+<tr><td>1. Outside (The Nathan Adler   Diaries: A Hyper Cyicle)</td><td>David Bowie</td><td>6,0</td><td>The Motel</td><td>1995</td></tr>
+<tr><td>Reality</td><td>David Bowie</td><td>6,0</td><td>New Killer Star</td><td>2003</td></tr>
+<tr><td>Nothing Was the Same</td><td>Drake</td><td>6,0</td><td>Pound Cake / Paris Morton Music 2</td><td>2013</td></tr>
+<tr><td>Peter Pun</td><td>Punjizz</td><td>6,0</td><td>Geisterfahrer</td><td>2021</td></tr>
+<tr><td>Sing me a Lullaby, My Sweet   Temptation</td><td>$uicideboy$</td><td>6,0</td><td>1000 Blunts</td><td>2022</td></tr>
+<tr><td>WASTELAND</td><td>LEX</td><td>6,0</td><td>Aschenbecher</td><td>2024</td></tr>
+<tr><td>The Pilot</td><td>MAVI</td><td>6,0</td><td>Typewriter (feat. Kenny Mason)</td><td>2025</td></tr>
+<tr><td>26QT02: LP-1</td><td>Ahzumjot</td><td>6,0</td><td>dinner plate / der plan</td><td>2026</td></tr>
+<tr><td>American Football (4)</td><td>American Football</td><td>6,0</td><td>Man Overboard</td><td>2026</td></tr>
+<tr><td>Heavenly Body: If I&#x27;m The   Bottle You&#x27;re The Message</td><td>Eartheater</td><td>6,0</td><td>Wasp In the Fig</td><td>2026</td></tr>
+<tr><td>BLISS</td><td>Mairo &amp; neophron</td><td>6,0</td><td>TOUR D&#x27;IVOIRE</td><td>2026</td></tr>
+<tr><td>Popstar</td><td>Tinashe</td><td>6,0</td><td>Melatonin</td><td>2026</td></tr>
+<tr><td>Weezer (Gold Album)</td><td>Weezer</td><td>6,0</td><td>We Might as Well Be Strangers</td><td>2026</td></tr>
+<tr><td>Miles Davis, Vol. 3</td><td>Miles Davis</td><td>6,1</td><td>It Never Entered My Mind</td><td>1954</td></tr>
+<tr><td>Amandla</td><td>Miles Davis</td><td>6,1</td><td>Hannibal</td><td>1989</td></tr>
+<tr><td>Doo-Bop</td><td>Miles Davis</td><td>6,1</td><td>Fantasy</td><td>1992</td></tr>
+<tr><td>Ach du grüne Neune</td><td>GReeeN</td><td>6,1</td><td>Geldhai</td><td>2018</td></tr>
+<tr><td>Come Over When You&#x27;re Sober,   Pt. 2</td><td>Lil Peep</td><td>6,1</td><td>Leanin&#x27;</td><td>2018</td></tr>
+<tr><td>That&#x27;ll Be The Day</td><td>Buddy Holly</td><td>6,2</td><td>You Are My One Desire</td><td>1958</td></tr>
+<tr><td>Aura</td><td>Miles Davis</td><td>6,2</td><td>Orange</td><td>1989</td></tr>
+<tr><td>Leben Am Limit</td><td>SXTN</td><td>6,2</td><td>Bongzimmer</td><td>2017</td></tr>
+<tr><td>THE BPM</td><td>Sudan Archives</td><td>6,2</td><td>SHE&#x27;S GOT PAIN</td><td>2025</td></tr>
+<tr><td>Perfecth</td><td>Queens of the Stone Age</td><td>6,2</td><td>Insignificant Other</td><td>2026</td></tr>
+<tr><td>Sunset Blush</td><td>Sadness</td><td>6,2</td><td>pink sounds</td><td>2026</td></tr>
+<tr><td>Blue Period</td><td>Miles Davis</td><td>6,3</td><td>Bluing</td><td>1953</td></tr>
+<tr><td>Diamond Dogs</td><td>David Bowie</td><td>6,3</td><td>Rebel Rebel</td><td>1974</td></tr>
+<tr><td>Long Term Effects of SUFFERING</td><td>$uicideboy$</td><td>6,3</td><td>5 Grand at 8 to 1</td><td>2021</td></tr>
+<tr><td>Donda</td><td>Kanye West</td><td>6,3</td><td>Come to Life</td><td>2021</td></tr>
+<tr><td>Rebel</td><td>EsDeeKid</td><td>6,3</td><td>4 Raws</td><td>2025</td></tr>
+<tr><td>Foreign Tongues</td><td>Rolling Stones</td><td>6,3</td><td>In The Stars</td><td>2026</td></tr>
+<tr><td>Miles Davis Plays the   Compositions of Al Cohn</td><td>Miles Davis</td><td>6,4</td><td>Tasty Pudding</td><td>1953</td></tr>
+<tr><td>Time Out for Tears</td><td>The Ink Spots</td><td>6,4</td><td>I Get The Blues When It Rains</td><td>1956</td></tr>
+<tr><td>The &quot;Chirping&quot;   Crickets</td><td>The Crickets</td><td>6,4</td><td>That&#x27;ll Be The Day</td><td>1957</td></tr>
+<tr><td>Lodger</td><td>David Bowie</td><td>6,4</td><td>D.J.</td><td>1979</td></tr>
+<tr><td>Take Care</td><td>Drake</td><td>6,4</td><td>The Real Her</td><td>2011</td></tr>
+<tr><td>DeBÍ TiRAR MáS FOToS</td><td>Bad Bunny</td><td>6,4</td><td>NUEVAYoL</td><td>2025</td></tr>
+<tr><td>The Mountain</td><td>Gorillaz</td><td>6,4</td><td>The Sad God</td><td>2026</td></tr>
+<tr><td>Cop</td><td>Swans</td><td>6,5</td><td>Cop</td><td>1984</td></tr>
+<tr><td>Heathen</td><td>David Bowie</td><td>6,5</td><td>5:15 the Angels Have Gone</td><td>2002</td></tr>
+<tr><td>My Agenda</td><td>Dorian Electra</td><td>6,5</td><td>Ram It Down</td><td>2020</td></tr>
+<tr><td>to hell with it</td><td>PinkPantheress</td><td>6,5</td><td>Pain</td><td>2021</td></tr>
+<tr><td>Heavy Is The Crown</td><td>Anderson .Paak &amp; Cordae</td><td>6,5</td><td>Days Go By</td><td>2026</td></tr>
+<tr><td>My Days of 58</td><td>Bill Callahan</td><td>6,5</td><td>Why Do Men Sing</td><td>2026</td></tr>
+<tr><td>The Same Place</td><td>The Olivia Tremor Control</td><td>6,5</td><td>Advice from the Oceans</td><td>2026</td></tr>
+<tr><td>The New Sounds</td><td>Miles Davis</td><td>6,6</td><td>Conception</td><td>1951</td></tr>
+<tr><td>Insight Out</td><td>The Association</td><td>6,6</td><td>Windy</td><td>1967</td></tr>
+<tr><td>Joe Cocker!</td><td>Joe Cocker</td><td>6,6</td><td>Dear Landlord</td><td>1969</td></tr>
+<tr><td>The Party&#x27;s Over</td><td>Talk Talk</td><td>6,6</td><td>Talk Talk</td><td>1982</td></tr>
+<tr><td>Let&#x27;s Dance</td><td>David Bowie</td><td>6,6</td><td>Modern Love</td><td>1983</td></tr>
+<tr><td>HIStory: Past, Present and   Future, Book I</td><td>Michael Jackson</td><td>6,6</td><td>They Don&#x27;t Care About Us</td><td>1995</td></tr>
+<tr><td>LONG.LIVE.A$AP</td><td>A$AP Rocky</td><td>6,6</td><td>LVL</td><td>2013</td></tr>
+<tr><td>Pylon</td><td>beabadoobee</td><td>6,6</td><td>Estranged</td><td>2026</td></tr>
+<tr><td>Miles Davis, Vol. 2</td><td>Miles Davis</td><td>6,7</td><td>I Waited for You</td><td>1953</td></tr>
+<tr><td>Miles Davis Quartet</td><td>Miles Davis</td><td>6,7</td><td>When Lights Are Low</td><td>1954</td></tr>
+<tr><td>After School Session</td><td>Chuck Berry</td><td>6,7</td><td>No Monkey Down</td><td>1957</td></tr>
+<tr><td>Larks&#x27; Tongues in Aspic</td><td>King Crimson</td><td>6,7</td><td>Exiles</td><td>1973</td></tr>
+<tr><td>Dangerous</td><td>Michael Jackson</td><td>6,7</td><td>Why You Wanna Trip on Me</td><td>1991</td></tr>
+<tr><td>shadowbox</td><td>MAVI</td><td>6,7</td><td>20,000 leagues</td><td>2024</td></tr>
+<tr><td>Fieber</td><td>OG Keemo</td><td>6,7</td><td>Tórshavn</td><td>2024</td></tr>
+<tr><td>URGH</td><td>Mandy, Indiana</td><td>6,7</td><td>ist halt so</td><td>2026</td></tr>
+<tr><td>DOOMED!</td><td>Open Mike Eagle &amp; Kenny Segal</td><td>6,7</td><td>soulless cycle</td><td>2026</td></tr>
+<tr><td>Blue Moods</td><td>Miles Davis</td><td>6,8</td><td>Nature Boy</td><td>1955</td></tr>
+<tr><td>Sheffield Steel</td><td>Joe Cocker</td><td>6,8</td><td>Many Rivers To Cross</td><td>1972</td></tr>
+<tr><td>Isn&#x27;t Anything</td><td>my bloody valentine</td><td>6,8</td><td>No More Sorry</td><td>1988</td></tr>
+<tr><td>The Burning World</td><td>Swans</td><td>6,8</td><td>God Damn the Sun</td><td>1989</td></tr>
+<tr><td>American Football (2)</td><td>American Football</td><td>6,8</td><td>My Instincts Are the Enemy</td><td>2016</td></tr>
+<tr><td>WEIL DU ES LIEBST</td><td>Ahzumjot</td><td>6,8</td><td>ZUHAUSE</td><td>2022</td></tr>
+<tr><td>Don&#x27;t Be Dumb</td><td>A$AP Rocky</td><td>6,8</td><td>STOLE YA FLOW</td><td>2026</td></tr>
+<tr><td>MISERY</td><td>absent</td><td>6,8</td><td>escitalopram</td><td>2026</td></tr>
+<tr><td>Ride Lonesome</td><td>Beck</td><td>6,8</td><td>Ride Lonesome</td><td>2026</td></tr>
+<tr><td>Inferno</td><td>Boards of Canada</td><td>6,8</td><td>Prophecy At 1420 MHz</td><td>2026</td></tr>
+<tr><td>Dungeon Vision</td><td>Earth Tongue</td><td>6,8</td><td>Body of Water</td><td>2026</td></tr>
+<tr><td>Frozen Charlotte</td><td>Jack White</td><td>6,8</td><td>G.O.D. And The Broken Ribs</td><td>2026</td></tr>
+<tr><td>Hoping As A Coping Mechanism</td><td>MOULD</td><td>6,8</td><td>Float</td><td>2026</td></tr>
+<tr><td>you seem pretty sad for a girl   so in love</td><td>Olivia Rodrigo</td><td>6,8</td><td>stupid song</td><td>2026</td></tr>
+<tr><td>Buddy Holly</td><td>Buddy Holly</td><td>6,9</td><td>Everyday</td><td>1958</td></tr>
+<tr><td>New Conversations</td><td>Bill Evans</td><td>6,9</td><td>Remember The Rain</td><td>1978</td></tr>
+<tr><td>Greed</td><td>Swans</td><td>6,9</td><td>Fool</td><td>1986</td></tr>
+<tr><td>The Bends</td><td>Radiohead</td><td>6,9</td><td>Fake Plastic Trees</td><td>1995</td></tr>
+<tr><td>Invincible</td><td>Michael Jackson</td><td>6,9</td><td>Heaven Can Wait</td><td>2001</td></tr>
+<tr><td>Neptun</td><td>OG Keemo</td><td>6,9</td><td>Neptun</td><td>2017</td></tr>
+<tr><td>Teufel Fallen</td><td>Souly</td><td>6,9</td><td>Lieferando für 2</td><td>2022</td></tr>
+<tr><td>marroW</td><td>brakence</td><td>6,9</td><td>Problem Child</td><td>2026</td></tr>
+<tr><td>Teenage Widow</td><td>idialedyournumber</td><td>6,9</td><td>Teenage Widow</td><td>2026</td></tr>
+<tr><td>Trying Times</td><td>James Blake</td><td>6,9</td><td>Just A Little Higher</td><td>2026</td></tr>
+<tr><td>Angel</td><td>Lizzy McAlpine</td><td>6,9</td><td>Our strange ways</td><td>2026</td></tr>
+<tr><td>祝おう [Celebrate]</td><td>MASS OF THE FERMENTING DREGS</td><td>6,9</td><td>Let It Go</td><td>2026</td></tr>
+<tr><td>you made me / skin on linen</td><td>PISS</td><td>6,9</td><td>how can you act opposite to this emotion?</td><td>2026</td></tr>
+<tr><td>Singin&#x27; To An Empty Chair</td><td>Ratboys</td><td>6,9</td><td>Light Night Mountains All That</td><td>2026</td></tr>
+<tr><td>THIS MUSIC MAY CONTAIN HOPE.</td><td>Raye</td><td>6,9</td><td>Beware.. The South London Lover Boy.</td><td>2026</td></tr>
+<tr><td>Picture Day</td><td>The Fencesitters</td><td>6,9</td><td>Flight Song</td><td>2026</td></tr>
+<tr><td>It Goes On</td><td>Westside Cowboy</td><td>6,9</td><td>Pin Up Boys</td><td>2026</td></tr>
+<tr><td>The Man Who Sold the World</td><td>David Bowie</td><td>7,0</td><td>The Width of a Circle</td><td>1970</td></tr>
+<tr><td>Filth</td><td>Swans</td><td>7,0</td><td>Power for Power</td><td>1983</td></tr>
+<tr><td>Eliminator</td><td>ZZ Top</td><td>7,0</td><td>Sharp Dressed Man</td><td>1983</td></tr>
+<tr><td>Holy Money</td><td>Swans</td><td>7,0</td><td>A Hanging</td><td>1986</td></tr>
+<tr><td>Earthling</td><td>David Bowie</td><td>7,0</td><td>I&#x27;m Afraid of Americans</td><td>1997</td></tr>
+<tr><td>Amnesiac</td><td>Radiohead</td><td>7,0</td><td>Life In a Glasshouse</td><td>2001</td></tr>
+<tr><td>Leaves Turn Inside You</td><td>Unwound</td><td>7,0</td><td>Below the Salt</td><td>2001</td></tr>
+<tr><td>Don&#x27;t Give Up on Me</td><td>Solomon Burke</td><td>7,0</td><td>None Of Us Are Free</td><td>2002</td></tr>
+<tr><td>Favourite Worst Nightmare</td><td>Arctic Monkeys</td><td>7,0</td><td>Only Ones Who Know</td><td>2007</td></tr>
+<tr><td>Watch The Throne</td><td>Kanye West &amp; JAY-Z</td><td>7,0</td><td>No Church In The Wild</td><td>2011</td></tr>
+<tr><td>Today, I Wrote Nothing</td><td>billy woods</td><td>7,0</td><td>U-Boats</td><td>2015</td></tr>
+<tr><td>Fashion Week</td><td>Death Grips</td><td>7,0</td><td>Runway J</td><td>2015</td></tr>
+<tr><td>LIL PEEP; PART ONE</td><td>Lil Peep</td><td>7,0</td><td>praying to the sky</td><td>2015</td></tr>
+<tr><td>&quot;Luciferian Towers&quot;</td><td>Godspeed You! Black Emperor</td><td>7,0</td><td>Anthem for No State</td><td>2017</td></tr>
+<tr><td>SICK!</td><td>Earl Sweatshirt</td><td>7,0</td><td>Tabula Rasa</td><td>2022</td></tr>
+<tr><td>Love Is Not Enough</td><td>Converge</td><td>7,0</td><td>Amon Amok</td><td>2026</td></tr>
+<tr><td>A Ghostly Reflection</td><td>favesoul</td><td>7,0</td><td>Hiding in Quicksand</td><td>2026</td></tr>
+<tr><td>Role Model Hermit</td><td>mary in the junkyard</td><td>7,0</td><td>Blood</td><td>2026</td></tr>
+<tr><td>Everybody&#x27;s Home, Nobody is   Happy</td><td>Sawyner Hill</td><td>7,0</td><td>Jimmy&#x27;s Gone Numb</td><td>2026</td></tr>
+<tr><td>Oh yeah?</td><td>Steve Lacy</td><td>7,0</td><td>bebe</td><td>2026</td></tr>
+<tr><td>Please Please Me</td><td>The Beatles</td><td>7,1</td><td>I Saw Her Standing There</td><td>1963</td></tr>
+<tr><td>I Could Live In Hope</td><td>Low</td><td>7,1</td><td>Lullaby</td><td>1994</td></tr>
+<tr><td>My Beautiful Dark Twisted   Fantasy</td><td>Kanye West</td><td>7,1</td><td>Devil In A New Dress</td><td>2010</td></tr>
+<tr><td>American Football (3)</td><td>American Football</td><td>7,1</td><td>Silhouettes</td><td>2019</td></tr>
+<tr><td>Laughing so Hard, it Hurts</td><td>MAVI</td><td>7,1</td><td>High John</td><td>2022</td></tr>
+<tr><td>Ca$ino</td><td>Baby Keem</td><td>7,1</td><td>I am not a Lyricist</td><td>2026</td></tr>
+<tr><td>AUDACITY</td><td>Jae Stephens</td><td>7,1</td><td>Expensive &amp; Difficult</td><td>2026</td></tr>
+<tr><td>A Stranger To You</td><td>Loathe</td><td>7,1</td><td>Meet My Maker</td><td>2026</td></tr>
+<tr><td>fata morgana</td><td>L&#x27;Rain</td><td>7,1</td><td>She Swear I&#x27;m Colorblind (feat. billy woods)</td><td>2026</td></tr>
+<tr><td>Happier Now</td><td>Movements</td><td>7,1</td><td>Everything Is Fine</td><td>2026</td></tr>
+<tr><td>Hotel Usona</td><td>Protomartyr</td><td>7,1</td><td></td><td>2026</td></tr>
+<tr><td>Someday My Prince Will Come</td><td>Miles Davis</td><td>7,2</td><td>Pfrancing</td><td>1961</td></tr>
+<tr><td>Conversations with Myself</td><td>Bill Evans</td><td>7,2</td><td>Bemsha Swing</td><td>1963</td></tr>
+<tr><td>The Most Important Jazz Album   of 1964/65</td><td>Chet Baker</td><td>7,2</td><td>Soultrane</td><td>1964</td></tr>
+<tr><td>A Hard Day&#x27;s Night</td><td>The Beatles</td><td>7,2</td><td>And I Love Her</td><td>1964</td></tr>
+<tr><td>Solid Ground</td><td>Ronnie Laws</td><td>7,2</td><td>Stay Awake</td><td>1981</td></tr>
+<tr><td>Nowhere</td><td>Ride</td><td>7,2</td><td>Vapour Trail</td><td>1990</td></tr>
+<tr><td>i saw an angel in the mirror</td><td>Robin Callaway</td><td>7,2</td><td>seraphim ii</td><td>2024</td></tr>
+<tr><td>Monarch of Monsters</td><td>Vylet Pony</td><td>7,2</td><td>The Wallflower Equation</td><td>2024</td></tr>
+<tr><td>e.t.d.s. A Mixtape by .idk.</td><td>IDK</td><td>7,2</td><td>LiFE 4 A LiFE</td><td>2026</td></tr>
+<tr><td>c</td><td>Lucy Bedroque</td><td>7,2</td><td>SPEED DEMON</td><td>2026</td></tr>
+<tr><td>My New Band Believe</td><td>My New Band Believe</td><td>7,2</td><td>Heart of Darkness</td><td>2026</td></tr>
+<tr><td>Cry Baby</td><td>Vince Staples</td><td>7,2</td><td>Blackberry Marmalade</td><td>2026</td></tr>
+<tr><td>Kindness, She&#x27;s so Jealous</td><td>yulia</td><td>7,2</td><td>vanilla chai</td><td>2026</td></tr>
+<tr><td>Trio 64</td><td>Bill Evans</td><td>7,3</td><td>I&#x27;ll See You Again</td><td>1964</td></tr>
+<tr><td>Sorcerer</td><td>Miles Davis</td><td>7,3</td><td>Prince of Darkness</td><td>1967</td></tr>
+<tr><td>Stealers Wheel</td><td>Stealers Wheel</td><td>7,3</td><td>Stuck In The Middle With You</td><td>1972</td></tr>
+<tr><td>Interstellar Space</td><td>John Coltrane</td><td>7,3</td><td>Mars: Fourth From the Sun; Battlefield of the Cosmic Giants</td><td>1974</td></tr>
+<tr><td>I Will Say Goodbye</td><td>The Bill Evans Trio</td><td>7,3</td><td>A House Is Not A Home</td><td>1980</td></tr>
+<tr><td>Dynamo</td><td>Soda Stereo</td><td>7,3</td><td>Ameba</td><td>1992</td></tr>
+<tr><td>Whatever People Say I Am,   That&#x27;s What I&#x27;m Not</td><td>Arctic Monkeys</td><td>7,3</td><td>I Bet You Look Good On The Dancefloor</td><td>2006</td></tr>
+<tr><td>Enjoy Eternal Bliss</td><td>Yndi Halda</td><td>7,3</td><td>We Flood Empty Lakes</td><td>2006</td></tr>
+<tr><td>AT.LONG.LAST.A$AP</td><td>A$AP Rocky</td><td>7,3</td><td>Everyday (feat. Rod Stewart, Miguel &amp; Mark Ronson)</td><td>2015</td></tr>
+<tr><td>Black Ben Carson</td><td>JPEGMAFIA</td><td>7,3</td><td>I Just Killed A Cop Now I&#x27;m Horny</td><td>2016</td></tr>
+<tr><td>Sweater Curse</td><td>They Are Gutting a Body of Water</td><td>7,3</td><td>sweater curse</td><td>2017</td></tr>
+<tr><td>One Wayne G</td><td>Mac DeMarco</td><td>7,3</td><td>20201203</td><td>2023</td></tr>
+<tr><td>New World Depression</td><td>$uicideboy$</td><td>7,3</td><td>Kill Yourself V</td><td>2024</td></tr>
+<tr><td>trojan horse</td><td>matt proxy</td><td>7,3</td><td>MISERY</td><td>2026</td></tr>
+<tr><td>You Be Good, I Love You</td><td>Million Moons</td><td>7,3</td><td>Black Sun Rising</td><td>2026</td></tr>
+<tr><td>Ballads</td><td>John Coltrane</td><td>7,4</td><td>Say It (Over and Over Again)</td><td>1963</td></tr>
+<tr><td>A Man and the Blues</td><td>Buddy Guy</td><td>7,4</td><td>Mary Had A Little Lamb</td><td>1968</td></tr>
+<tr><td>With a Little Help from My   Friends</td><td>Joe Cocker</td><td>7,4</td><td>With a Little Help From My Friends</td><td>1969</td></tr>
+<tr><td>Alone</td><td>Bill Evans</td><td>7,4</td><td>Here&#x27;s That Rainy Day</td><td>1970</td></tr>
+<tr><td>Let It Be</td><td>The Beatles</td><td>7,4</td><td>Let It Be</td><td>1970</td></tr>
+<tr><td>I Can Stand a Little Rain</td><td>Joe Cocker</td><td>7,4</td><td>You Are So Beatiful</td><td>1974</td></tr>
+<tr><td>Going Blank Again</td><td>Ride</td><td>7,4</td><td>Mouse Trap</td><td>1992</td></tr>
+<tr><td>LIVE FOREVER</td><td>Lil Peep</td><td>7,4</td><td>vibe</td><td>2015</td></tr>
+<tr><td>It Is Going To Get Dark</td><td>No Cure</td><td>7,4</td><td>Slowly Turning Blue</td><td>2021</td></tr>
+<tr><td>Time Heals Everything</td><td>Blu &amp; Exile</td><td>7,4</td><td>Crumbs</td><td>2026</td></tr>
+<tr><td>Help!</td><td>The Beatles</td><td>7,5</td><td>Yesterday</td><td>1965</td></tr>
+<tr><td>David Bowie [Space Oddity]</td><td>David Bowie</td><td>7,5</td><td>Space Oddity</td><td>1969</td></tr>
+<tr><td>Moonflower</td><td>Santana</td><td>7,5</td><td>She&#x27;s Not There</td><td>1977</td></tr>
+<tr><td>On Green Dolphin Street</td><td>Bill Evans</td><td>7,5</td><td>On Green Dolphin Street</td><td>1978</td></tr>
+<tr><td>The Colour and the Shape</td><td>Foo Fighters</td><td>7,5</td><td>Everlong</td><td>1997</td></tr>
+<tr><td>The Earth Is Not a Cold Dead   Place</td><td>Explosions In The Sky</td><td>7,5</td><td>Your Hand in Mine</td><td>2003</td></tr>
+<tr><td>The Black Parade</td><td>My Chemical Romance</td><td>7,5</td><td>Sleep</td><td>2006</td></tr>
+<tr><td>Skalp</td><td>OG Keemo</td><td>7,5</td><td>Vorwort</td><td>2018</td></tr>
+<tr><td>LUCKY STYLES</td><td>They Are Gutting a Body of Water</td><td>7,5</td><td>23 til infinity</td><td>2022</td></tr>
+<tr><td>Live Laugh Love</td><td>Earl Sweatshirt</td><td>7,5</td><td>exhaust</td><td>2025</td></tr>
+<tr><td>Alone Together</td><td>Show Me the Body</td><td>7,5</td><td>No God</td><td>2026</td></tr>
+<tr><td>Woody Guthrie</td><td>Woody Guthrie</td><td>7,6</td><td>Jesus Christ</td><td>1944</td></tr>
+<tr><td>Affinity</td><td>Bill Evans &amp; Toots Thielemans</td><td>7,6</td><td>I Do It For Your Love</td><td>1979</td></tr>
+<tr><td>…I Care Because You Do</td><td>Aphex Twin</td><td>7,6</td><td>Alberto Balsalm</td><td>1995</td></tr>
+<tr><td>One Time for All Time</td><td>65daysofstatic</td><td>7,6</td><td>Await Rescue</td><td>2005</td></tr>
+<tr><td>Little Victories</td><td>Krobak</td><td>7,6</td><td>It&#x27;s Snowing Like It&#x27;s the End of the World</td><td>2013</td></tr>
+<tr><td>&#x27;Asunder, Sweet and Other   Distress&#x27;</td><td>Godspeed You! Black Emperor</td><td>7,6</td><td>Piss Crowns Are Trebled</td><td>2015</td></tr>
+<tr><td>Both Directions at Once: The   Lost Album</td><td>John Coltrane</td><td>7,6</td><td>Untitled Orginal 11386</td><td>2018</td></tr>
+<tr><td>gestures been</td><td>They Are Gutting a Body of Water</td><td>7,6</td><td>jadakiss</td><td>2018</td></tr>
+<tr><td>leaving meaning.</td><td>Swans</td><td>7,6</td><td>Sunfucker</td><td>2019</td></tr>
+<tr><td>WINTER TAT WEH</td><td>Ahzumjot</td><td>7,6</td><td>DEAD INSIDE</td><td>2024</td></tr>
+<tr><td>Alfredo 2</td><td>Freddie Gibbs &amp; The Alchemist</td><td>7,6</td><td>Skinny Suge II</td><td>2025</td></tr>
+<tr><td>From the Pyre</td><td>The Last Dinner Party</td><td>7,6</td><td>The Scythe</td><td>2025</td></tr>
+<tr><td>DON&#x27;T TAP THE GLASS</td><td>Tyler, The Creator</td><td>7,6</td><td>I&#x27;ll Take Care of You</td><td>2025</td></tr>
+<tr><td>The Atomic Mr. Basie</td><td>Count Basie &amp; Neal Hefti</td><td>7,7</td><td>Splanky</td><td>1958</td></tr>
+<tr><td>Relaxin&#x27; With the Miles Davis   Quintet</td><td>Miles Davis</td><td>7,7</td><td>If I Were a Bell</td><td>1958</td></tr>
+<tr><td>Berry Is On Top</td><td>Chuck Berry</td><td>7,7</td><td>Johnny B. Goode</td><td>1959</td></tr>
+<tr><td>Layla and Other Assorted Love   Songs</td><td>Derek and the Dominos</td><td>7,7</td><td>Layla</td><td>1970</td></tr>
+<tr><td>Caravanserai</td><td>Santana</td><td>7,7</td><td>All the Love of the Universe</td><td>1972</td></tr>
+<tr><td>Symbiosis</td><td>Bill Evans</td><td>7,7</td><td>Symbiosis, 2nd Movement: Largo - Adante - Maestoso - Largo,   Pt. 1</td><td>1974</td></tr>
+<tr><td>Raise</td><td>Swervedriver</td><td>7,7</td><td>Sunset</td><td>1991</td></tr>
+<tr><td>They Spent Their Wild Youthful   Days in the Glittering World of the Salons</td><td>Swirlies</td><td>7,7</td><td>Sounds of Sebring</td><td>1996</td></tr>
+<tr><td>808s &amp; Heartbreaks</td><td>Kanye West</td><td>7,7</td><td>Street Lights</td><td>2008</td></tr>
+<tr><td>The Next Day</td><td>David Bowie</td><td>7,7</td><td>Valentine&#x27;s Day</td><td>2013</td></tr>
+<tr><td>If You&#x27;re Reading This it&#x27;s   Too Late</td><td>Drake</td><td>7,7</td><td>Madonna</td><td>2015</td></tr>
+<tr><td>BLAOW</td><td>Lance Butters</td><td>7,7</td><td>Es zieht / Ich zieh</td><td>2015</td></tr>
+<tr><td>Ich wünschte, es würd&#x27; mich   kümmern</td><td>Souly</td><td>7,7</td><td>Woah</td><td>2023</td></tr>
+<tr><td>Fancy That</td><td>PinkPantheress</td><td>7,7</td><td>Stateside</td><td>2025</td></tr>
+<tr><td>In a while this will all be   gone</td><td>acloudyskye</td><td>7,7</td><td>Tomorrow/Fish storm</td><td>2026</td></tr>
+<tr><td>26QT02: LP-2</td><td>Ahzumjot</td><td>7,7</td><td>(vielleicht) tag vier</td><td>2026</td></tr>
+<tr><td>Hell for a Basement</td><td>drug bug</td><td>7,7</td><td>Seraphim</td><td>2026</td></tr>
+<tr><td>The Fall-Off</td><td>J. Cole</td><td>7,7</td><td>The Fall-Off is Inevitable</td><td>2026</td></tr>
+<tr><td>Det hjemsøkte hjertet</td><td>Panopticon</td><td>7,7</td><td>Ghost Eyes in the Fire Light</td><td>2026</td></tr>
+<tr><td>Sock It 2 My Pocket</td><td>Rome Streetz</td><td>7,7</td><td>Son Of A Gun</td><td>2026</td></tr>
+<tr><td>Hail To the Thief</td><td>Radiohead</td><td>7,8</td><td>There, There</td><td>2003</td></tr>
+<tr><td>New Jazz Conceptions</td><td>Bill Evans</td><td>7,8</td><td>Waltz For Debby</td><td>1957</td></tr>
+<tr><td>Chet</td><td>Chet Baker</td><td>7,8</td><td>If You Could See Me Now</td><td>1959</td></tr>
+<tr><td>Coltrane</td><td>John Coltrane</td><td>7,8</td><td>Soul Eyes</td><td>1962</td></tr>
+<tr><td>Crescent</td><td>John Coltrane</td><td>7,8</td><td>Bessie&#x27;s Blues</td><td>1964</td></tr>
+<tr><td>Trio &#x27;65</td><td>Bill Evans Trio</td><td>7,8</td><td>Elsa</td><td>1965</td></tr>
+<tr><td>Nefertiti</td><td>Miles Davis</td><td>7,8</td><td>Fall</td><td>1968</td></tr>
+<tr><td>Stan Getz &amp; Bill Evans</td><td>Stan Getz &amp; Bill Evans</td><td>7,8</td><td>But Beautiful</td><td>1973</td></tr>
+<tr><td>We Will Meet Again</td><td>Bill Evans</td><td>7,8</td><td>We Will Meet Again</td><td>1980</td></tr>
+<tr><td>Bossanova</td><td>Pixies</td><td>7,8</td><td>Down to the Well</td><td>1990</td></tr>
+<tr><td>Love of Life</td><td>Swans</td><td>7,8</td><td>Love of Life</td><td>1992</td></tr>
+<tr><td>Roman Candle</td><td>Elliott Smith</td><td>7,8</td><td>Last Call</td><td>1994</td></tr>
+<tr><td>Let My People Go</td><td>Darondo</td><td>7,8</td><td>Didn&#x27;t I</td><td>2006</td></tr>
+<tr><td>Kollaps Tradixionales</td><td>A Silver Mt. Zion Memorial Orchestra &amp; Tra-La-La Band With   Choir</td><td>7,8</td><td>I Built Myself A Metal Bird</td><td>2010</td></tr>
+<tr><td>My Father Will Guide Me Up a   Rope to the Sky</td><td>Swans</td><td>7,8</td><td>No Words / No Thoughts</td><td>2010</td></tr>
+<tr><td>Government Plates</td><td>Death Grips</td><td>7,8</td><td>You Might Think He Loves You for Your Money but I Know What   He Really…</td><td>2013</td></tr>
+<tr><td>G_d&#x27;s Pee AT STATE&#x27;S END!</td><td>Godspeed You! Black Emperor</td><td>7,8</td><td>OUR SIDE HAS TO WIN (for D.H.)</td><td>2021</td></tr>
+<tr><td>Melt My Eyez See Your Future</td><td>Denzel Curry</td><td>7,8</td><td>Walkin</td><td>2022</td></tr>
+<tr><td>Music, Fashion, Film</td><td>Charli xcx</td><td>7,8</td><td>SS26</td><td>2026</td></tr>
+<tr><td>Sidera</td><td>Misere Luminis</td><td>7,8</td><td>À la douleur de l&#x27;aube</td><td>2026</td></tr>
+<tr><td>Sir Render</td><td>Navy Blue</td><td>7,8</td><td>Belladonna</td><td>2026</td></tr>
+<tr><td>Life 1</td><td>Quadeca</td><td>7,8</td><td>Baby steps</td><td>2026</td></tr>
+<tr><td>UNADULTERATED</td><td>Roman Candle</td><td>7,8</td><td>Can We Watch Something Happy?</td><td>2026</td></tr>
+<tr><td>SWALLOW!</td><td>Shygirl</td><td>7,8</td><td>Lucky[Hymn]</td><td>2026</td></tr>
+<tr><td>Bags &amp; Trane</td><td>Milt Jackson &amp; John Coltrane</td><td>7,9</td><td>Bags &amp; Trane</td><td>1961</td></tr>
+<tr><td>Know What I Mean?</td><td>Bill Evans &amp; Cannonball Adderly</td><td>7,9</td><td>Goodbye</td><td>1962</td></tr>
+<tr><td>Night Train</td><td>Oscar Peterson Trio</td><td>7,9</td><td>Georgia On My Mind</td><td>1963</td></tr>
+<tr><td>America</td><td>America</td><td>7,9</td><td>A Horse with No Name</td><td>1971</td></tr>
+<tr><td>Closing Time</td><td>Tom Waits</td><td>7,9</td><td>Martha</td><td>1973</td></tr>
+<tr><td>A Night At The Opera</td><td>Queen</td><td>7,9</td><td>Bohemian Rhapsody</td><td>1975</td></tr>
+<tr><td>Discipline</td><td>King Crimson</td><td>7,9</td><td>Frame by Frame</td><td>1981</td></tr>
+<tr><td>The Message</td><td>Grandmaster Flash &amp; The Furious Five</td><td>7,9</td><td>The Message</td><td>1982</td></tr>
+<tr><td>Debut</td><td>Björk</td><td>7,9</td><td>Human Behaviour</td><td>1993</td></tr>
+<tr><td>flood</td><td>Boris</td><td>7,9</td><td>[untitled] 3</td><td>2000</td></tr>
+<tr><td>crystallize</td><td>東京酒吐座 [Tokyo Shoegazer]</td><td>7,9</td><td>Bright</td><td>2011</td></tr>
+<tr><td>2</td><td>Mac DeMarco</td><td>7,9</td><td>Freaking Out the Neighborhood</td><td>2012</td></tr>
+<tr><td>Floral Green</td><td>Title Fight</td><td>7,9</td><td>Head in the Ceiling Fan</td><td>2012</td></tr>
+<tr><td>Stranger in the Alps</td><td>Phoebe Bridgers</td><td>7,9</td><td>Demi Moore</td><td>2017</td></tr>
+<tr><td>TA13OO</td><td>Denzel Curry</td><td>7,9</td><td>SIRENS | Z1RENZ</td><td>2018</td></tr>
+<tr><td>ye</td><td>Kanye West</td><td>7,9</td><td>Violent Crimes</td><td>2018</td></tr>
+<tr><td>The Passionate Ones</td><td>Nourished By Time</td><td>7,9</td><td>Max Potential</td><td>2025</td></tr>
+<tr><td>Morir Saltando</td><td>Hesse Kassel</td><td>7,9</td><td>Pornomiseria</td><td>2026</td></tr>
+<tr><td>So Help Me God</td><td>Kelsey Lu</td><td>7,9</td><td>Comfort</td><td>2026</td></tr>
+<tr><td>An Undying Love for a Burning   World</td><td>Neurosis</td><td>7,9</td><td>First Red Rays</td><td>2026</td></tr>
+<tr><td>COME CLOSER</td><td>TOMORA</td><td>7,9</td><td>A BOY LIKE YOU</td><td>2026</td></tr>
+<tr><td>Here&#x27;s Little Richard</td><td>Little Richard</td><td>8,0</td><td>Long Tall Sally (The Thing)</td><td>1957</td></tr>
+<tr><td>Interplay</td><td>Bill Evans</td><td>8,0</td><td>You And The Night And The Music</td><td>1962</td></tr>
+<tr><td>Moon Beams</td><td>Bill Evans Trio</td><td>8,0</td><td>Re: Person I Knew</td><td>1962</td></tr>
+<tr><td>John Coltrane and Johnny   Hartman</td><td>John Coltrane &amp; Johnny Hartman</td><td>8,0</td><td>My One and Only Love</td><td>1963</td></tr>
+<tr><td>Magical Mystery Tour</td><td>The Beatles</td><td>8,0</td><td>Strawberry Fields Forever</td><td>1967</td></tr>
+<tr><td>Scary Monsters (And Super   Creeps)</td><td>David Bowie</td><td>8,0</td><td>Ashes to Ashes</td><td>1980</td></tr>
+<tr><td>It&#x27;s My Life</td><td>Talk Talk</td><td>8,0</td><td>It&#x27;s My Life</td><td>1984</td></tr>
+<tr><td>Bleach</td><td>Nirvana</td><td>8,0</td><td>Love Buzz</td><td>1989</td></tr>
+<tr><td>Pretty On The Inside</td><td>Hole</td><td>8,0</td><td>Teenage Whore</td><td>1991</td></tr>
+<tr><td>The Slim Shady LP</td><td>Eminem</td><td>8,0</td><td>Role Model</td><td>1999</td></tr>
+<tr><td>Sea Change</td><td>Beck</td><td>8,0</td><td>Lost Cause</td><td>2002</td></tr>
+<tr><td>Yeezus</td><td>Kanye West</td><td>8,0</td><td>Bound 2</td><td>2013</td></tr>
+<tr><td>m b v</td><td>my bloody valentine</td><td>8,0</td><td>only tomorrow</td><td>2013</td></tr>
+<tr><td>Syro</td><td>Aphex Twin</td><td>8,0</td><td>180db\_[130]</td><td>2014</td></tr>
+<tr><td>Blonde</td><td>Frank Ocean</td><td>8,0</td><td>Ivy</td><td>2016</td></tr>
+<tr><td>Geist</td><td>OG Keemo</td><td>8,0</td><td>55 - Interlude</td><td>2019</td></tr>
+<tr><td>Destiny XL</td><td>They Are Gutting a Body of Water</td><td>8,0</td><td>eightball</td><td>2019</td></tr>
+<tr><td>3:00</td><td>Ahzumjot</td><td>8,0</td><td>Haifisch</td><td>2021</td></tr>
+<tr><td>Voir Dire</td><td>Earl Sweatshirt</td><td>8,0</td><td>My Brother, the Wind</td><td>2023</td></tr>
+<tr><td>No Name</td><td>Jack White</td><td>8,0</td><td>Old Scratch Blues</td><td>2024</td></tr>
+<tr><td>Bossbaby Tape</td><td>Souly</td><td>8,0</td><td>Bossbaby Intro</td><td>2024</td></tr>
+<tr><td>FRANCIS</td><td>Ahzumjot</td><td>8,0</td><td>PUSSY</td><td>2025</td></tr>
+<tr><td>Lieder, die ich geschrieben   habe anstatt aus dem Fenster zu springen</td><td>Beslik</td><td>8,0</td><td>so ein schöner Tag - interlude</td><td>2025</td></tr>
+<tr><td>REDSTAR WU &amp; THE WORLDWIDE   SCOURGE</td><td>Genesis Owusu</td><td>8,0</td><td>HELLSTAR</td><td>2026</td></tr>
+<tr><td>友達がいました [Tomodachigaimashita]</td><td>Trooper Salute</td><td>8,0</td><td>成れの果て</td><td>2026</td></tr>
+<tr><td>Meditation</td><td>John Coltrane</td><td>8,1</td><td>Love</td><td>1966</td></tr>
+<tr><td>Miles Smiles</td><td>Miles Davis</td><td>8,1</td><td>Footprints</td><td>1967</td></tr>
+<tr><td>Drainland</td><td>Michael Gira</td><td>8,1</td><td>You See Through Me</td><td>1995</td></tr>
+<tr><td>Rushup Edge</td><td>The Tuss</td><td>8,1</td><td>Rushup I Bank 12</td><td>2007</td></tr>
+<tr><td>This Will Destory You</td><td>This Will Destroy You</td><td>8,1</td><td>Threads</td><td>2008</td></tr>
+<tr><td>Born This Way</td><td>Lady Gaga</td><td>8,1</td><td>The Edge Of Glory</td><td>2011</td></tr>
+<tr><td>The Unnatural World</td><td>Have A Nice Life</td><td>8,1</td><td>Guggenheim Wax Museum</td><td>2014</td></tr>
+<tr><td>IV</td><td>BADBADNOTGOOD</td><td>8,1</td><td>Confessions, Pt. 2</td><td>2016</td></tr>
+<tr><td>Once in a Long, Long While…</td><td>Low Roar</td><td>8,1</td><td>St. Eriksplan</td><td>2017</td></tr>
+<tr><td>Alfredo</td><td>Freddie Gibbs &amp; The Alchemist</td><td>8,1</td><td>1985</td><td>2020</td></tr>
+<tr><td>CHROMAKOPIA</td><td>Tyler, The Creator</td><td>8,1</td><td>St. Chroma (feat. Daniel Caesar)</td><td>2024</td></tr>
+<tr><td>noisehigh</td><td>Robin Callaway</td><td>8,1</td><td>noiserenity</td><td>2025</td></tr>
+<tr><td>Vol.II</td><td>Angine de Poitrine</td><td>8,1</td><td>Fabienk</td><td>2026</td></tr>
+<tr><td>Age of the Exhibitionist</td><td>Rebecca Black</td><td>8,1</td><td>Hot Wet Delirious</td><td>2026</td></tr>
+<tr><td>Duke Ellington and John   Coltrane</td><td>Duke Ellington &amp; John Coltrane</td><td>8,2</td><td>In a Sentimental Mood</td><td>1963</td></tr>
+<tr><td>Ascension</td><td>John Coltrane</td><td>8,2</td><td>Ascension (Part I)</td><td>1966</td></tr>
+<tr><td>I Never Loved a Man the Way I   Love You</td><td>Aretha Franklin</td><td>8,2</td><td>Respect</td><td>1967</td></tr>
+<tr><td>The Heart of Saturday Night</td><td>Tom Waits</td><td>8,2</td><td>The Ghosts of Saturday Night (After Hours at Napoleone&#x27;s   House)</td><td>1974</td></tr>
+<tr><td>Mellow Dream</td><td>福居良 [Ryo Fukui]</td><td>8,2</td><td>Horizon</td><td>1977</td></tr>
+<tr><td>Graduation</td><td>Kanye West</td><td>8,2</td><td>Everything I Am</td><td>2007</td></tr>
+<tr><td>LIVE.LOVE.A$AP</td><td>A$AP Rocky</td><td>8,2</td><td>Bass</td><td>2011</td></tr>
+<tr><td>Ceres &amp; Calypso in the   Deep Time</td><td>Candy Claws</td><td>8,2</td><td>Transitional Bird (Clever Girl)</td><td>2013</td></tr>
+<tr><td>月世界遊泳 [Moonworld Playground]</td><td>東京酒吐座 [Tokyo Shoegazer]</td><td>8,2</td><td>Destroy</td><td>2022</td></tr>
+<tr><td>Junkie in The Sun</td><td>Deante&#x27; Hitchcock</td><td>8,2</td><td>Smile You&#x27;re On Camera</td><td>2026</td></tr>
+<tr><td>westside trapped</td><td>heavensouls</td><td>8,2</td><td>shed a tear for me</td><td>2026</td></tr>
+<tr><td>Charlie Parker</td><td>Charlie Parker</td><td>8,3</td><td>Now&#x27;s the Time</td><td>1951</td></tr>
+<tr><td>Birth Of The Cool</td><td>Miles Davis</td><td>8,3</td><td>Jeru</td><td>1957</td></tr>
+<tr><td>The Shape of Jazz to Come</td><td>Ornette Coleman</td><td>8,3</td><td>Lonely Woman</td><td>1959</td></tr>
+<tr><td>Sun Ship</td><td>John Coltrane</td><td>8,3</td><td>Dearly Beloved</td><td>1971</td></tr>
+<tr><td>Celebrity Skin</td><td>Hole</td><td>8,3</td><td>Celebrity Skin</td><td>1998</td></tr>
+<tr><td>drukQs</td><td>Aphex Twin</td><td>8,3</td><td>Avril 14th</td><td>2001</td></tr>
+<tr><td>No Love Deep Web</td><td>Death Grips</td><td>8,3</td><td>No Love</td><td>2012</td></tr>
+<tr><td>untitled unmastered.</td><td>Kendrick Lamar</td><td>8,3</td><td>untitled 08 | 09.06.2014.</td><td>2016</td></tr>
+<tr><td>Let the Sun Talk</td><td>MAVI</td><td>8,3</td><td>Daylight Saving</td><td>2019</td></tr>
+<tr><td>Punisher</td><td>Phoebe Bridgers</td><td>8,3</td><td>Garden Song</td><td>2020</td></tr>
+<tr><td>CALL ME IF YOU GET LOST</td><td>Tyler, The Creator</td><td>8,3</td><td>SIR BAUDELAIRE (feat. DJ Drama)</td><td>2021</td></tr>
+<tr><td>I Didn&#x27;t Mean to Haunt You</td><td>Quadeca</td><td>8,3</td><td>fractions of infinity</td><td>2022</td></tr>
+<tr><td>The Beggar</td><td>Swans</td><td>8,3</td><td>The Beggar</td><td>2023</td></tr>
+<tr><td>Revengeseekerz</td><td>Jane Remover</td><td>8,3</td><td>Fadeoutz</td><td>2025</td></tr>
+<tr><td>Balloonerism</td><td>Mac Miller</td><td>8,3</td><td>DJ&#x27;s Chorg Organ (feat. SZA)</td><td>2025</td></tr>
+<tr><td>ii</td><td>Denzel Curry &amp; Kenny Beats</td><td>8,3</td><td>DIFFERENCE</td><td>2026</td></tr>
+<tr><td>&quot;cantu&quot; of the sower</td><td>heavensouls</td><td>8,3</td><td>&quot;model housing&quot;</td><td>2026</td></tr>
+<tr><td>Portrait in Jazz</td><td>Bill Evans Trio</td><td>8,4</td><td>Autumn Leaves</td><td>1960</td></tr>
+<tr><td>Sketches of Spain</td><td>Miles Davis</td><td>8,4</td><td>Concierto de Aranjuez: Adagio</td><td>1960</td></tr>
+<tr><td>(Pronounced &#x27;Lĕh-&#x27;nérd   &#x27;Skin-&#x27;nérd)</td><td>Lynyrd Skynyrd</td><td>8,4</td><td>Free Bird</td><td>1973</td></tr>
+<tr><td>Horses</td><td>Patti Smith</td><td>8,4</td><td>Free Money</td><td>1975</td></tr>
+<tr><td>Pink Flag</td><td>Wire</td><td>8,4</td><td>Mannequin</td><td>1977</td></tr>
+<tr><td>Surfer Rosa</td><td>Pixies</td><td>8,4</td><td>Where Is My Mind?</td><td>1988</td></tr>
+<tr><td>Badmotorfinger</td><td>Soundgarden</td><td>8,4</td><td></td><td>1991</td></tr>
+<tr><td>These Are Not Fall Colors</td><td>Lync</td><td>8,4</td><td>B</td><td>1994</td></tr>
+<tr><td>渦になる [Uzu ni naru]</td><td>きのこ帝国 [Kinoko Teikoku]</td><td>8,4</td><td>退屈しのぎ</td><td>2012</td></tr>
+<tr><td>Doris</td><td>Earl Sweatshirt</td><td>8,4</td><td>Whoa</td><td>2013</td></tr>
+<tr><td>Fuck Off Get Free We Pour   Light on Everything</td><td>A Silver Mt. Zion Memorial Orchestra &amp; Tra-La-La Band With   Choir</td><td>8,4</td><td>What We Loved Was Not Enough</td><td>2014</td></tr>
+<tr><td>Salad Days</td><td>Mac DeMarco</td><td>8,4</td><td>Chamber Of Reflection</td><td>2014</td></tr>
+<tr><td>Currents</td><td>Tame Impala</td><td>8,4</td><td>Let It Happen</td><td>2015</td></tr>
+<tr><td>The Life Of Pablo</td><td>Kanye West</td><td>8,4</td><td>Saint Pablo</td><td>2016</td></tr>
+<tr><td>Everywhere at the End of Time:   Stage 1</td><td>The Caretaker</td><td>8,4</td><td>A1 - It&#x27;s just a burning memory</td><td>2016</td></tr>
+<tr><td>CALL ME IF YOU GET LOST: The   Estate Sale</td><td>Tyler, The Creator</td><td>8,4</td><td>SORRY NOT SORRY</td><td>2023</td></tr>
+<tr><td>Heavy Metal</td><td>Cameron Winter</td><td>8,4</td><td>$0</td><td>2024</td></tr>
+<tr><td>No Ritmo da Terra</td><td>Antropoceno</td><td>8,4</td><td>Xe Anama (Coração no Ritmo da Terra)</td><td>2026</td></tr>
+<tr><td>These Killing Times</td><td>Emma Ruth Rundle</td><td>8,4</td><td>Powerless</td><td>2026</td></tr>
+<tr><td>your inner world is deeply   uninteresting</td><td>spiral staircase</td><td>8,4</td><td>no light shining through</td><td>2026</td></tr>
+<tr><td>&#x27;Round About Midnight</td><td>Miles Davis</td><td>8,5</td><td>&#x27;Round Midnight</td><td>1957</td></tr>
+<tr><td>Somethin&#x27; Else</td><td>Cannonball Adderly</td><td>8,5</td><td>Autmn Leaves</td><td>1958</td></tr>
+<tr><td>Olé Coltrane</td><td>John Coltrane</td><td>8,5</td><td>Olé</td><td>1961</td></tr>
+<tr><td>The Doors</td><td>The Doors</td><td>8,5</td><td>Light My Fire</td><td>1967</td></tr>
+<tr><td>Silk Degrees</td><td>Boz Scaggs</td><td>8,5</td><td>Lowdown</td><td>1976</td></tr>
+<tr><td>Heaven or Las Vegas</td><td>Cocteau Twins</td><td>8,5</td><td>Cherry-coloured Funk</td><td>1990</td></tr>
+<tr><td>Blood Money</td><td>Tom Waits</td><td>8,5</td><td>A Good Man Is Hard To Find</td><td>2002</td></tr>
+<tr><td>Niggas on the Moon</td><td>Death Grips</td><td>8,5</td><td>Billy Not Really</td><td>2014</td></tr>
+<tr><td>Carrie &amp; Lowell</td><td>Sufjan Stevens</td><td>8,5</td><td>Blue Bucket of Gold</td><td>2015</td></tr>
+<tr><td>A Moon Shaped Pool</td><td>Radiohead</td><td>8,5</td><td>Glass Eyes</td><td>2016</td></tr>
+<tr><td>This Old Dog</td><td>Mac DeMarco</td><td>8,5</td><td>Moonlight on the River</td><td>2017</td></tr>
+<tr><td>Frailty</td><td>Jane Remover</td><td>8,5</td><td>movies for guys</td><td>2021</td></tr>
+<tr><td>Imaginal Disk</td><td>Magdalena Bay</td><td>8,5</td><td>Tunnel Vision</td><td>2024</td></tr>
+<tr><td>Vanisher, Horizon Scraper</td><td>Quadeca</td><td>8,5</td><td>FORGONE</td><td>2025</td></tr>
+<tr><td>My Ghosts Go Ghost</td><td>By Storm</td><td>8,5</td><td>In My Town</td><td>2026</td></tr>
+<tr><td>lambspring</td><td>lulamoon</td><td>8,5</td><td>one year hrt</td><td>2026</td></tr>
+<tr><td>Charlie Parker With Strings</td><td>Charlie Parker</td><td>8,6</td><td>Summertime</td><td>1950</td></tr>
+<tr><td>Ray Charles (aka. Hallelujah,   I Love Her So)</td><td>Ray Charles</td><td>8,6</td><td>Sinner&#x27;s Prayer</td><td>1957</td></tr>
+<tr><td>Milestones</td><td>Miles Davis</td><td>8,6</td><td>Milestones</td><td>1958</td></tr>
+<tr><td>Exploration</td><td>Bill Evans Trio</td><td>8,6</td><td>Nardis</td><td>1961</td></tr>
+<tr><td>Hunky Dory</td><td>David Bowie</td><td>8,6</td><td>Life on Mars?</td><td>1971</td></tr>
+<tr><td>On the Corner</td><td>Miles Davis</td><td>8,6</td><td>Black Satin</td><td>1972</td></tr>
+<tr><td>American Football (1)</td><td>American Football</td><td>8,6</td><td>Never Meant</td><td>1999</td></tr>
+<tr><td>Ágætis byrjun</td><td>Sigur Rós</td><td>8,6</td><td>Starálfur</td><td>1999</td></tr>
+<tr><td>Discovery</td><td>Daft Punk</td><td>8,6</td><td>Face to Face</td><td>2001</td></tr>
+<tr><td>Songs About Leaving</td><td>Carissa&#x27;s Wierd</td><td>8,6</td><td>They&#x27;ll Only Miss You When You Leave</td><td>2002</td></tr>
+<tr><td>From a Basement on the Hill</td><td>Elliott Smith</td><td>8,6</td><td>Twilight</td><td>2004</td></tr>
+<tr><td>Back to Black</td><td>Amy Winehouse</td><td>8,6</td><td>Rehab</td><td>2006</td></tr>
+<tr><td>This Is Happening</td><td>LCD Soundsystem</td><td>8,6</td><td>All I Want</td><td>2010</td></tr>
+<tr><td>I Don&#x27;t Like Shit, I Don&#x27;t Go   Outside</td><td>Earl Sweatshirt</td><td>8,6</td><td>Off Top</td><td>2015</td></tr>
+<tr><td>Everywhere at the End of Time:   Stage 3</td><td>The Caretaker</td><td>8,6</td><td>F7 - Libet delay</td><td>2017</td></tr>
+<tr><td>Veteran</td><td>JPEGMAFIA</td><td>8,6</td><td>Rainbow Six</td><td>2018</td></tr>
+<tr><td>Hiding Places</td><td>billy woods &amp; Kenny Segal</td><td>8,6</td><td>Red Dust</td><td>2019</td></tr>
+<tr><td>Bandana</td><td>Freddie Gibbs &amp; Madlib</td><td>8,6</td><td>Education</td><td>2019</td></tr>
+<tr><td>wetdream</td><td>Willy Rodriguez</td><td>8,6</td><td>wetdream</td><td>2023</td></tr>
+<tr><td>LOTTO</td><td>They Are Gutting a Bodey of Water</td><td>8,6</td><td>sour diesel</td><td>2025</td></tr>
+<tr><td>To Whom This May Concern</td><td>Jill Scott</td><td>8,6</td><td>Pay U on Tuesday</td><td>2026</td></tr>
+<tr><td>Cannonball</td><td>Man/Woman/Chainsaw</td><td>8,6</td><td>Only Girl</td><td>2026</td></tr>
+<tr><td>The Clown</td><td>Charles Mingus</td><td>8,7</td><td>Haitian Fight Song</td><td>1957</td></tr>
+<tr><td>Saxophone Colossus</td><td>Sonny Rollins</td><td>8,7</td><td>Strode Rode</td><td>1957</td></tr>
+<tr><td>Art Blakey and the Jazz   Messengers [Moanin&#x27;]</td><td>Art Blakey &amp; The Jazz Messengers</td><td>8,7</td><td>Moanin&#x27;</td><td>1959</td></tr>
+<tr><td>Rubber Soul</td><td>The Beatles</td><td>8,7</td><td>In My Life</td><td>1965</td></tr>
+<tr><td>Santana</td><td>Santana</td><td>8,7</td><td>Evil Ways</td><td>1969</td></tr>
+<tr><td>Bryter Layter</td><td>Nick Drake</td><td>8,7</td><td>Northern Sky</td><td>1971</td></tr>
+<tr><td>Talking Book</td><td>Stevie Wonder</td><td>8,7</td><td>Superstition</td><td>1972</td></tr>
+<tr><td>Swordfishtrombones</td><td>Tom Waits</td><td>8,7</td><td>16 Shells From A 30.6</td><td>1983</td></tr>
+<tr><td>The Colour of Spring</td><td>Talk Talk</td><td>8,7</td><td>Life&#x27;s What You Make It</td><td>1986</td></tr>
+<tr><td>Violator</td><td>Depeche Mode</td><td>8,7</td><td>Clean</td><td>1990</td></tr>
+<tr><td>Pinkerton</td><td>Weezer</td><td>8,7</td><td>Falling For You</td><td>1996</td></tr>
+<tr><td>Operation: Doomsday</td><td>MF DOOM</td><td>8,7</td><td>Rhymes Like Dimes</td><td>1999</td></tr>
+<tr><td>American IV: The Man Comes   Around</td><td>Johnny Cash</td><td>8,7</td><td>Hurt</td><td>2002</td></tr>
+<tr><td>Exmilitary</td><td>Death Grips</td><td>8,7</td><td>Beware</td><td>2011</td></tr>
+<tr><td>Cavalcade</td><td>black midi</td><td>8,7</td><td>Marlene Dietrich</td><td>2021</td></tr>
+<tr><td>I LAY DOWN MY LIFE FOR YOU</td><td>JPEGMAFIA</td><td>8,7</td><td>either on or off the drugs</td><td>2024</td></tr>
+<tr><td>Pain to Power</td><td>Maruja</td><td>8,7</td><td>Reconcile</td><td>2025</td></tr>
+<tr><td>lucy miró al mundo y notó que   está girando</td><td>AKRILA</td><td>8,7</td><td>un &lt;3 inestable</td><td>2026</td></tr>
+<tr><td>hunting what we already killed</td><td>Dev Lemons</td><td>8,7</td><td>another word you say</td><td>2026</td></tr>
+<tr><td>U</td><td>underscores</td><td>8,7</td><td>The Peace</td><td>2026</td></tr>
+<tr><td>Everybody Digs Bill Evans</td><td>Bill Evans Trio</td><td>8,8</td><td>Peace Piece</td><td>1959</td></tr>
+<tr><td>Let it Bleed</td><td>Rolling Stones</td><td>8,8</td><td>Gimme Shelter</td><td>1969</td></tr>
+<tr><td>Master of Reality</td><td>Black Sabbath</td><td>8,8</td><td>Children of the Grave</td><td>1971</td></tr>
+<tr><td>Santana III</td><td>Santana</td><td>8,8</td><td>Toussaint L&#x27;Overture</td><td>1971</td></tr>
+<tr><td>Thriller</td><td>Michael Jackson</td><td>8,8</td><td>Beat It</td><td>1982</td></tr>
+<tr><td>World of Echo</td><td>Arthur Russell</td><td>8,8</td><td>Being It</td><td>1986</td></tr>
+<tr><td>Children of God</td><td>Swans</td><td>8,8</td><td>Beautiful Child</td><td>1987</td></tr>
+<tr><td>Disintegration</td><td>The Cure</td><td>8,8</td><td>Prayers For Rain</td><td>1989</td></tr>
+<tr><td>Souvlaki</td><td>Slowdive</td><td>8,8</td><td>When the Sun Hits</td><td>1993</td></tr>
+<tr><td>The Eminem Show</td><td>Eminem</td><td>8,8</td><td>Square Dance</td><td>2002</td></tr>
+<tr><td>Flower Boy</td><td>Tyler, The Creator</td><td>8,8</td><td>911 / Mr. Lonely (feat. Frank Ocean &amp; Steve Lacy)</td><td>2017</td></tr>
+<tr><td>Paraffin</td><td>Armand Hammer</td><td>8,8</td><td>No Days Off</td><td>2018</td></tr>
+<tr><td>Year of the Snitch</td><td>Death Grips</td><td>8,8</td><td>Death Grips Is Online</td><td>2018</td></tr>
+<tr><td>The Turning Wheel</td><td>SPELLLING</td><td>8,8</td><td>Sweet Talk</td><td>2021</td></tr>
+<tr><td>3D Country</td><td>Geese</td><td>8,8</td><td>2122</td><td>2023</td></tr>
+<tr><td>Census Designated</td><td>Jane Remover</td><td>8,8</td><td>Lips</td><td>2023</td></tr>
+<tr><td>GNX</td><td>Kendrick Lamar</td><td>8,8</td><td>wacced out murals</td><td>2024</td></tr>
+<tr><td>Magic, Alive!</td><td>McKinley Dixon</td><td>8,8</td><td>Sugar Water (feat. Quelle Chris and Anjimile)</td><td>2025</td></tr>
+<tr><td>new avatar</td><td>Kelela</td><td>8,8</td><td>crystalize</td><td>2026</td></tr>
+<tr><td>status update music</td><td>leroy</td><td>8,8</td><td>XO TOUR LLIF3</td><td>2026</td></tr>
+<tr><td>Lost Weekend</td><td>Phoebe Bridgers</td><td>8,8</td><td>As Above</td><td>2026</td></tr>
+<tr><td>Undercurrent</td><td>Bill Evans &amp; Jim Hall</td><td>8,9</td><td>My Funny Valentine</td><td>1962</td></tr>
+<tr><td>Axis: Bold as Love</td><td>The Jimi Hendrix Experience</td><td>8,9</td><td>Little Wing</td><td>1967</td></tr>
+<tr><td>Pearl</td><td>Janis Joplin</td><td>8,9</td><td>Cry Baby</td><td>1971</td></tr>
+<tr><td>Nighthawks at the Diner</td><td>Tom Waits</td><td>8,9</td><td>Opening Intro</td><td>1975</td></tr>
+<tr><td>The Queen Is Dead</td><td>The Smiths</td><td>8,9</td><td>Bigmouth Strikes Again</td><td>1986</td></tr>
+<tr><td>White Light from the Mouth of   Infinity</td><td>Swans</td><td>8,9</td><td>Power and Sacrifice</td><td>1991</td></tr>
+<tr><td>Selected Ambient Works Volume   II</td><td>Aphex Twin</td><td>8,9</td><td>#7</td><td>1994</td></tr>
+<tr><td>Live Through This</td><td>Hole</td><td>8,9</td><td>Violet</td><td>1994</td></tr>
+<tr><td>Weezer (Blue Album)</td><td>Weezer</td><td>8,9</td><td>The World Has Turned And Left Me Here</td><td>1994</td></tr>
+<tr><td>XO</td><td>Elliott Smith</td><td>8,9</td><td>Waltz, No. 2 (XO)</td><td>1998</td></tr>
+<tr><td>Kid A</td><td>Radiohead</td><td>8,9</td><td>Idioteque</td><td>2000</td></tr>
+<tr><td>Is This It</td><td>The Strokes</td><td>8,9</td><td>Someday</td><td>2001</td></tr>
+<tr><td>Sound of Silver</td><td>LCD Soundsystem</td><td>8,9</td><td>All My Friends</td><td>2007</td></tr>
+<tr><td>Stadtaffe</td><td>Peter Fox</td><td>8,9</td><td>Schwarz zu blau</td><td>2008</td></tr>
+<tr><td>Section.80</td><td>Kendrick Lamar</td><td>8,9</td><td>Ronald Reagan Era</td><td>2011</td></tr>
+<tr><td>Everywhere at the End of Time:   Stage 2</td><td>The Caretaker</td><td>8,9</td><td>D5 - The way ahead feels lonely</td><td>2017</td></tr>
+<tr><td>KIDS SEE GHOSTS</td><td>KIDS SEE GHOSTS</td><td>8,9</td><td>Cudi Montage</td><td>2018</td></tr>
+<tr><td>Schlagenheim</td><td>black midi</td><td>8,9</td><td>Ducter</td><td>2019</td></tr>
+<tr><td>アダンの風 [Windswept Adan]</td><td>青葉市子 [Ichiko Aoba]</td><td>8,9</td><td>Dawn in the Adan</td><td>2020</td></tr>
+<tr><td>Human Error</td><td>Olēka</td><td>8,9</td><td>Around the Corner</td><td>2026</td></tr>
+<tr><td>Florida Water Blues</td><td>Twisted Teens</td><td>8,9</td><td>Hand Me A Cigarrete</td><td>2026</td></tr>
+<tr><td>Remains</td><td>東京酒吐座 [Tokyo Shoegazer]</td><td>8,9</td><td>Wisteria</td><td>2026</td></tr>
+<tr><td>Mingus Ah Um</td><td>Charles Mingus</td><td>9,0</td><td>Goodbye Pork Pie Hat</td><td>1959</td></tr>
+<tr><td>Are You Experienced</td><td>The Jimi Hendrix Experience</td><td>9,0</td><td>Purple Haze</td><td>1967</td></tr>
+<tr><td>Black Sabbath</td><td>Black Sabbath</td><td>9,0</td><td>N.I.B.</td><td>1970</td></tr>
+<tr><td>You Must Believe in Spring</td><td>Bill Evans</td><td>9,0</td><td>All Of You</td><td>1981</td></tr>
+<tr><td>Master of Puppets</td><td>Metallica</td><td>9,0</td><td>Orion</td><td>1986</td></tr>
+<tr><td>Bad</td><td>Michael Jackson</td><td>9,0</td><td>Dirty Diana</td><td>1987</td></tr>
+<tr><td>Ready to Die</td><td>The Notorious B.I.G.</td><td>9,0</td><td>Suicidal Thoughts</td><td>1994</td></tr>
+<tr><td>Richard D. James Album</td><td>Aphex Twin</td><td>9,0</td><td>Fingerbib</td><td>1996</td></tr>
+<tr><td>LONG SEASON</td><td>Fishmans</td><td>9,0</td><td>{first track}</td><td>1996</td></tr>
+<tr><td>Voodoo</td><td>D&#x27;Angelo</td><td>9,0</td><td>Devil&#x27;s Pie</td><td>2000</td></tr>
+<tr><td>Mama&#x27;s Gun</td><td>Erykah Badu</td><td>9,0</td><td>Orange Moon</td><td>2000</td></tr>
+<tr><td>&quot;Born Into Trouble as the   Sparks Fly Upward&quot;</td><td>A Silver Mt. Zion Memorial Orchestra &amp; Tra-La-La Band With   Choir</td><td>9,0</td><td>Could&#x27;ve Moved Mountains</td><td>2001</td></tr>
+<tr><td>Horses in the Sky</td><td>A Silver Mt. Zion Memorial Orchestra &amp; Tra-La-La Band With   Choir</td><td>9,0</td><td>Mountains Made Of Steam</td><td>2005</td></tr>
+<tr><td>Donuts</td><td>J Dilla</td><td>9,0</td><td>Workinonit</td><td>2006</td></tr>
+<tr><td>ANGST</td><td>Lance Butters</td><td>9,0</td><td>Mag Sein</td><td>2018</td></tr>
+<tr><td>Mann Beisst Hund</td><td>OG Keemo</td><td>9,0</td><td>Vögel</td><td>2022</td></tr>
+<tr><td>BRAT</td><td>Charli xcx</td><td>9,0</td><td>Girl, so confusing</td><td>2024</td></tr>
+<tr><td>Let God Sort Em Out</td><td>Clipse</td><td>9,0</td><td>P.O.V.</td><td>2025</td></tr>
+<tr><td>Put A Smile On For Me</td><td>Keo</td><td>9,0</td><td>Fly</td><td>2026</td></tr>
+<tr><td>WOR$T GIRL IN AMERICA</td><td>Slayyyter</td><td>9,0</td><td>BEAT UP CHANEL$</td><td>2026</td></tr>
+<tr><td>The Holy Cross Tigers</td><td>Twisted Teens</td><td>9,0</td><td>When We First Met</td><td>2026</td></tr>
+<tr><td>Chet Baker Sings (Reissue)</td><td>Chet Baker</td><td>9,1</td><td>I Fall In Love Too Easily</td><td>1957</td></tr>
+<tr><td>Africa/Brass</td><td>John Coltrane</td><td>9,1</td><td>Blues Minor</td><td>1961</td></tr>
+<tr><td>Highway 61 Revisited</td><td>Bob Dylan</td><td>9,1</td><td>Like a Rolling Stone</td><td>1965</td></tr>
+<tr><td>Revolver</td><td>The Beatles</td><td>9,1</td><td>Eleanor Rigby</td><td>1966</td></tr>
+<tr><td>Abraxas</td><td>Santana</td><td>9,1</td><td>Black Magic Woman / Gypsy Queen</td><td>1970</td></tr>
+<tr><td>Off the Wall</td><td>Michael Jackson</td><td>9,1</td><td>Don&#x27;t Stop &#x27;Til You Get Enough</td><td>1979</td></tr>
+<tr><td>London Calling</td><td>The Clash</td><td>9,1</td><td>Train in Vain</td><td>1979</td></tr>
+<tr><td>Rage Against The Machine</td><td>Rage Against The Machine</td><td>9,1</td><td>Wake Up</td><td>1992</td></tr>
+<tr><td>Yanqui U.X.O.</td><td>Godspeed You! Black Emperor</td><td>9,1</td><td>motherfucker=redeemer (cont.)</td><td>2002</td></tr>
+<tr><td>( )</td><td>Sigur Rós</td><td>9,1</td><td>Untitled #8</td><td>2002</td></tr>
+<tr><td>&quot;This Is Our   Punk-Rock,&quot; Thee Rusted Satellites Gather + Sing,</td><td>A Silver Mt. Zion Memorial Orchestra &amp; Tra-La-La Band With   Choir</td><td>9,1</td><td>American Motor Over Smoldered Field</td><td>2003</td></tr>
+<tr><td>Twin Fantasy (Face to Face)</td><td>Car Seat Headrest</td><td>9,1</td><td>Sober to Death</td><td>2018</td></tr>
+<tr><td>Mr. Morale &amp; The Big   Steppers</td><td>Kendrick Lamar</td><td>9,1</td><td>Mother I Sober (feat. Beth Gibbons of Portishead)</td><td>2022</td></tr>
+<tr><td>Ballads From the Dust Bowl</td><td>Woody Guthrie</td><td>9,2</td><td>Rambling Round</td><td>1946</td></tr>
+<tr><td>My Favorite Things</td><td>John Coltrane</td><td>9,2</td><td>Summertime</td><td>1961</td></tr>
+<tr><td>I Got Dem OI&#x27; Kozmic Blues   Again Mama!</td><td>Janis Joplin</td><td>9,2</td><td>One Good Man</td><td>1969</td></tr>
+<tr><td>Five Leaves Left</td><td>Nick Drake</td><td>9,2</td><td>Fruit Tree</td><td>1969</td></tr>
+<tr><td>Red</td><td>King Crimson</td><td>9,2</td><td>Red</td><td>1974</td></tr>
+<tr><td>Station to Station</td><td>David Bowie</td><td>9,2</td><td>Wild Is the Wind</td><td>1976</td></tr>
+<tr><td>Small Change</td><td>Tom Waits</td><td>9,2</td><td>Invitation To The Blues</td><td>1976</td></tr>
+<tr><td>Low</td><td>David Bowie</td><td>9,2</td><td>Be My Wife</td><td>1977</td></tr>
+<tr><td>Enter The Wu-Tang</td><td>Wu-Tang Clan</td><td>9,2</td><td>C.R.E.A.M. (Cash Rules Everything Around Me)</td><td>1993</td></tr>
+<tr><td>The Marshell Mathers LP</td><td>Eminem</td><td>9,2</td><td>Kim</td><td>2000</td></tr>
+<tr><td>The College Dropout</td><td>Kanye West</td><td>9,2</td><td>Through The Wire</td><td>2004</td></tr>
+<tr><td>Orphans: Brawlers, Bawlers   &amp; Bastards</td><td>Tom Waits</td><td>9,2</td><td>Dog Door</td><td>2006</td></tr>
+<tr><td>Giles Corey</td><td>Giles Corey</td><td>9,2</td><td>Blackest Bile</td><td>2015</td></tr>
+<tr><td>DAMN.</td><td>Kendrick Lamar</td><td>9,2</td><td>FEAR.</td><td>2017</td></tr>
+<tr><td>You Won&#x27;t Get What You Want</td><td>Daughters</td><td>9,2</td><td>City Song</td><td>2018</td></tr>
+<tr><td>The New Sound</td><td>Geordie Greep</td><td>9,2</td><td>Holy, Holy</td><td>2024</td></tr>
+<tr><td>Blue Train</td><td>John Coltrane</td><td>9,3</td><td>Locomotion</td><td>1957</td></tr>
+<tr><td>Getz/Gilberto</td><td>Stan Getz &amp; João Gilberto</td><td>9,3</td><td>The Girl from Ipanema</td><td>1964</td></tr>
+<tr><td>&quot;Heroes&quot;</td><td>David Bowie</td><td>9,3</td><td>&quot;Heroes&quot;</td><td>1977</td></tr>
+<tr><td>Marquee Moon</td><td>Television</td><td>9,3</td><td>Marquee Moon</td><td>1977</td></tr>
+<tr><td>The Wall</td><td>Pink Floyd</td><td>9,3</td><td>Another Brick in the Wall, Pt. 2</td><td>1979</td></tr>
+<tr><td>Purple Rain</td><td>Prince and the Revolution</td><td>9,3</td><td>Let&#x27;s Go Crazy</td><td>1984</td></tr>
+<tr><td>Superunknown</td><td>Soundgarden</td><td>9,3</td><td>Black Hole Sun</td><td>1994</td></tr>
+<tr><td>He Has Left Us Alone But   Shafts of Light Sometimes Grace the Corner of Our Rooms…</td><td>A Silver Mt. Zion</td><td>9,3</td><td>Blown-out Joy From Heaven&#x27;s Mercied Hole</td><td>2000</td></tr>
+<tr><td>Late Registration</td><td>Kanye West</td><td>9,3</td><td>Late</td><td>2005</td></tr>
+<tr><td>Piñata</td><td>Freddie Gibbs</td><td>9,3</td><td>Thuggin&#x27;</td><td>2014</td></tr>
+<tr><td>A Crow Looked at Me</td><td>Mount Eerie</td><td>9,3</td><td>Ravens</td><td>2017</td></tr>
+<tr><td>Getting Killed</td><td>Geese</td><td>9,3</td><td>Long Island City Here I Come</td><td>2025</td></tr>
+<tr><td>Karma</td><td>Pharoah Sanders</td><td>9,4</td><td>The Creator Has a Master Plan</td><td>1969</td></tr>
+<tr><td>The Dark Side of the Moon</td><td>Pink Floyd</td><td>9,4</td><td>The Great Gig in the Sky</td><td>1973</td></tr>
+<tr><td>I Want You</td><td>Marvin Gaye</td><td>9,4</td><td>I Want You</td><td>1976</td></tr>
+<tr><td>Hounds of Love</td><td>Kate Bush</td><td>9,4</td><td>Under Ice</td><td>1985</td></tr>
+<tr><td>Illmatic</td><td>Nas</td><td>9,4</td><td>N.Y State of Mind</td><td>1994</td></tr>
+<tr><td>Mark Hollis</td><td>Mark Hollis</td><td>9,4</td><td>The Watershed</td><td>1998</td></tr>
+<tr><td>Aquemeni</td><td>Outkast</td><td>9,4</td><td>Liberation</td><td>1998</td></tr>
+<tr><td>Mule Variations</td><td>Tom Waits</td><td>9,4</td><td>Big In Japan</td><td>1999</td></tr>
+<tr><td>Figure 8</td><td>Elliott Smith</td><td>9,4</td><td>Son of Sam</td><td>2000</td></tr>
+<tr><td>Jenny Death</td><td>Death Grips</td><td>9,4</td><td>On GP</td><td>2015</td></tr>
+<tr><td>Atrocity Exhibition</td><td>Danny Brown</td><td>9,4</td><td>Ain&#x27;t it Funny</td><td>2016</td></tr>
+<tr><td>LP! (Offline Version)</td><td>JPEGMAFIA</td><td>9,4</td><td>WHAT KINDA RAPPIN&#x27; IS THIS?</td><td>2021</td></tr>
+<tr><td>Ants From Up There</td><td>Black Country, New Road</td><td>9,4</td><td>The Place Where He Inserted the Blade</td><td>2022</td></tr>
+<tr><td>Birthing</td><td>Swans</td><td>9,4</td><td>I Am a Tower</td><td>2025</td></tr>
+<tr><td>The Velvet Underground &amp;   Nico</td><td>The Velvet Underground &amp; Nico</td><td>9,5</td><td>Femme Fatale</td><td>1967</td></tr>
+<tr><td>Hot Rats</td><td>Frank Zappa</td><td>9,5</td><td>Willie The Pimp</td><td>1969</td></tr>
+<tr><td>In a Silent Way</td><td>Miles Davis</td><td>9,5</td><td>Shhh / Peaceful</td><td>1969</td></tr>
+<tr><td>Exile On Main Street</td><td>Rolling Stones</td><td>9,5</td><td>Let It Loose</td><td>1972</td></tr>
+<tr><td>Scenery</td><td>福居良 [Ryo Fukui]</td><td>9,5</td><td>Early Summer</td><td>1976</td></tr>
+<tr><td>Grace</td><td>Jeff Buckley</td><td>9,5</td><td>Grace</td><td>1994</td></tr>
+<tr><td>Elliott Smith</td><td>Elliott Smith</td><td>9,5</td><td>Good To Go</td><td>1995</td></tr>
+<tr><td>The Infamous</td><td>Mobb Deep</td><td>9,5</td><td>Survival of the Fittest</td><td>1995</td></tr>
+<tr><td>In the Aeroplane Over the Sea</td><td>Neutral Milk Hotel</td><td>9,5</td><td>In the Aeroplane Over the Sea</td><td>1998</td></tr>
+<tr><td>Things Fall Apart</td><td>The Roots</td><td>9,5</td><td>Table Of Contents (Pts 1 &amp; 2)</td><td>1999</td></tr>
+<tr><td>MM..FOOD</td><td>MF DOOM</td><td>9,5</td><td>Vomitspit</td><td>2004</td></tr>
+<tr><td>Ys</td><td>Joanna Newsom</td><td>9,5</td><td>Emily</td><td>2006</td></tr>
+<tr><td>Watching from a Distance</td><td>Warning</td><td>9,5</td><td>Bridges</td><td>2006</td></tr>
+<tr><td>13 Blues for Thirteen Moons</td><td>A Silver Mt. Zion Memorial Orchestra &amp; Tra-La-La Band With   Choir</td><td>9,5</td><td>BlindBlindBlind</td><td>2008</td></tr>
+<tr><td>…Like Clockwork</td><td>Queens of the Stone Age</td><td>9,5</td><td>I Appear Missing</td><td>2013</td></tr>
+<tr><td>Some Rap Songs</td><td>Earl Sweatshirt</td><td>9,5</td><td>December 24</td><td>2018</td></tr>
+<tr><td>JazzArt Underground</td><td>Ciśnienie</td><td>9,5</td><td>Same Trupy</td><td>2019</td></tr>
+<tr><td>All My Heroes Are Cornballs</td><td>JPEGMAFIA</td><td>9,5</td><td>Free The Frail</td><td>2019</td></tr>
+<tr><td>SCARING THE HOES</td><td>JPEGMAFIA &amp; Danny Brown</td><td>9,5</td><td>God Loves You</td><td>2023</td></tr>
+<tr><td>In The Court Of The Crimson   King</td><td>King Crimson</td><td>9,6</td><td>Epitaph (Including &quot;March for No Reason&quot; and   &quot;Tomorrow and Tomorrow&quot;)</td><td>1969</td></tr>
+<tr><td>Paranoid</td><td>Black Sabbath</td><td>9,6</td><td>War Pigs</td><td>1970</td></tr>
+<tr><td>Led Zeppelin IV</td><td>Led Zeppelin</td><td>9,6</td><td>Stairway to Heaven</td><td>1971</td></tr>
+<tr><td>Let My Children Hear Music</td><td>Charles Mingus</td><td>9,6</td><td>The Shoes of the Fisherman&#x27;s Wife Are Some Jive Ass Slippers</td><td>1972</td></tr>
+<tr><td>Aladdin Sane</td><td>David Bowie</td><td>9,6</td><td>Watch That Man</td><td>1973</td></tr>
+<tr><td>Innervisions</td><td>Stevie Wonder</td><td>9,6</td><td>Living For The City</td><td>1973</td></tr>
+<tr><td>Spirit of Eden</td><td>Talk Talk</td><td>9,6</td><td>The Rainbow</td><td>1988</td></tr>
+<tr><td>Mount Eerie</td><td>The Microphones</td><td>9,6</td><td>II. Solar System</td><td>2002</td></tr>
+<tr><td>&#x27;Allelujah! Don&#x27;t Bend!   Ascend!</td><td>Godspeed You! Black Emperor</td><td>9,6</td><td>Mladic</td><td>2012</td></tr>
+<tr><td>Bottomless Pit</td><td>Death Grips</td><td>9,6</td><td>Ring A Bell</td><td>2016</td></tr>
+<tr><td>Sinner Get Ready</td><td>Lingua Ignota</td><td>9,6</td><td>PENNSYLVANIA FURNACE</td><td>2021</td></tr>
+<tr><td>The Black Saint And The Sinner   Lady</td><td>Charles Mingus</td><td>9,7</td><td>Track A- Solo Dancer</td><td>1963</td></tr>
+<tr><td>Nina Simone Sings The Blues</td><td>Nina Simone</td><td>9,7</td><td>Backlash Blues</td><td>1967</td></tr>
+<tr><td>Sgt. Pepper&#x27;s Lonely Hearts   Club Band</td><td>The Beatles</td><td>9,7</td><td>A Day In The Life</td><td>1967</td></tr>
+<tr><td>The Beatles</td><td>The Beatles</td><td>9,7</td><td>Blackbird</td><td>1968</td></tr>
+<tr><td>Bitches Brew</td><td>Miles Davis</td><td>9,7</td><td>Spanish Key</td><td>1970</td></tr>
+<tr><td>Sticky Fingers</td><td>Rolling Stones</td><td>9,7</td><td>Brown Sugar</td><td>1971</td></tr>
+<tr><td>Wish You Were Here</td><td>Pink Floyd</td><td>9,7</td><td>Have a Cigar</td><td>1975</td></tr>
+<tr><td>It Takes A Nation Of Millions   To Hold Us Back</td><td>Public Enemy</td><td>9,7</td><td>Party For Your Right To Fight</td><td>1988</td></tr>
+<tr><td>Doolittle</td><td>Pixies</td><td>9,7</td><td>Debaser</td><td>1989</td></tr>
+<tr><td>Selected Ambient Works 85-92</td><td>Aphex Twin</td><td>9,7</td><td>Tha</td><td>1992</td></tr>
+<tr><td>The Downward Spiral</td><td>Nine Inch Nails</td><td>9,7</td><td>Heresy</td><td>1994</td></tr>
+<tr><td>Soundtracks for the Blind</td><td>Swans</td><td>9,7</td><td>Helpless Child</td><td>1996</td></tr>
+<tr><td>The Miseducation of Lauryn   Hill</td><td>Ms. Lauryn Hill</td><td>9,7</td><td>Lost Ones</td><td>1998</td></tr>
+<tr><td>Let&#x27;s Get Free</td><td>Dead Prez</td><td>9,7</td><td>They&#x27; School</td><td>2000</td></tr>
+<tr><td>Songs for the Deaf</td><td>Queens of the Stone Age</td><td>9,7</td><td>No One Knows</td><td>2002</td></tr>
+<tr><td>The Seer</td><td>Swans</td><td>9,7</td><td>Lunacy</td><td>2012</td></tr>
+<tr><td>To Be Kind</td><td>Swans</td><td>9,7</td><td>Bring the Sun / Toussaint L&#x27;Ouverture</td><td>2014</td></tr>
+<tr><td>Hellfire</td><td>black midi</td><td>9,7</td><td>Sugar/Tzu</td><td>2022</td></tr>
+<tr><td>A Love Supreme</td><td>John Coltrane</td><td>9,8</td><td>A Love Supreme, Pt. I - Acknowladgement</td><td>1965</td></tr>
+<tr><td>Electric Ladyland</td><td>The Jimi Hendrix Experience</td><td>9,8</td><td>1983…(A merman I Should Turn to Be)</td><td>1968</td></tr>
+<tr><td>All Things Must Pass</td><td>George Harrison</td><td>9,8</td><td>Let It Down</td><td>1970</td></tr>
+<tr><td>The Rise and Fall of Ziggy   Stardust and the Spiders from Mars</td><td>David Bowie</td><td>9,8</td><td>Suffragette City</td><td>1972</td></tr>
+<tr><td>Rumours</td><td>Fleetwood Mac</td><td>9,8</td><td>You Make Loving Fun</td><td>1977</td></tr>
+<tr><td>Remain in Light</td><td>Talking Heads</td><td>9,8</td><td>Once in a Lifetime</td><td>1980</td></tr>
+<tr><td>Rain Dogs</td><td>Tom Waits</td><td>9,8</td><td>Union Square</td><td>1985</td></tr>
+<tr><td>Franks Wild Years</td><td>Tom Waits</td><td>9,8</td><td>Cold Cold Ground</td><td>1987</td></tr>
+<tr><td>Dummy</td><td>Portishead</td><td>9,8</td><td>Glory Box</td><td>1994</td></tr>
+<tr><td>The Great Annihilator</td><td>Swans</td><td>9,8</td><td>Killing for Company</td><td>1995</td></tr>
+<tr><td>OK Computer</td><td>Radiohead</td><td>9,8</td><td>Lucky</td><td>1997</td></tr>
+<tr><td>The Texas-Jerusalem Crossroads</td><td>Lift to Experience</td><td>9,8</td><td>Falling From Cloud 9</td><td>2001</td></tr>
+<tr><td>In Rainbows</td><td>Radiohead</td><td>9,8</td><td>Jigsaw Falling Into Place</td><td>2007</td></tr>
+<tr><td>good kid, m.A.A.d city</td><td>Kendrick Lamar</td><td>9,8</td><td>The Art Of Peer Pressure</td><td>2012</td></tr>
+<tr><td>CALIGULA</td><td>Lingua Ignota</td><td>9,8</td><td>I AM THE BEAST</td><td>2019</td></tr>
+<tr><td>IGOR</td><td>Tyler, The Creator</td><td>9,8</td><td>GONE, GONE / THANK YOU</td><td>2019</td></tr>
+<tr><td>&quot;NO TITLE AS OF 13   FEBRUARY 2024 28,340 DEAD&quot;</td><td>Godspeed You! Black Emperor</td><td>9,8</td><td>BABYS IN A THUNDERCLOUD</td><td>2024</td></tr>
+<tr><td>Blue</td><td>Joni Mitchell</td><td>9,9</td><td>River</td><td>1971</td></tr>
+<tr><td>The Low End Theory</td><td>A Tribe Called Quest</td><td>9,9</td><td>Buggin&#x27; Out</td><td>1991</td></tr>
+<tr><td>Nevermind</td><td>Nirvana</td><td>9,9</td><td>Come As You Are</td><td>1991</td></tr>
+<tr><td>Spiderland</td><td>Slint</td><td>9,9</td><td>Breadcrumb Trail</td><td>1991</td></tr>
+<tr><td>Either/Or</td><td>Elliott Smith</td><td>9,9</td><td>Between The Bars</td><td>1997</td></tr>
+<tr><td>Vespertine</td><td>Björk</td><td>9,9</td><td>Unison</td><td>2001</td></tr>
+<tr><td>The Glow Pt. 2</td><td>The Microphones</td><td>9,9</td><td>The Glow Pt. 2</td><td>2001</td></tr>
+<tr><td>The Magnolia Electric Co.</td><td>Songs: Ohia</td><td>9,9</td><td>Almost Was Good Enough</td><td>2003</td></tr>
+<tr><td>★ [Blackstar]</td><td>David Bowie</td><td>9,9</td><td>Lazarus</td><td>2016</td></tr>
+<tr><td>Kind Of Blue</td><td>Miles Davis</td><td>10,0</td><td>So What</td><td>1959</td></tr>
+<tr><td>Giant Steps</td><td>John Coltrane</td><td>10,0</td><td>Giant Steps</td><td>1960</td></tr>
+<tr><td>Abbey Road</td><td>The Beatles</td><td>10,0</td><td>Golden Slumbers</td><td>1969</td></tr>
+<tr><td>What&#x27;s Going On</td><td>Marvin Gaye</td><td>10,0</td><td>Mercy Mercy Me (The Ecology)</td><td>1971</td></tr>
+<tr><td>Pink Moon</td><td>Nick Drake</td><td>10,0</td><td>Things Behind The Sun</td><td>1972</td></tr>
+<tr><td>Songs in the Key of Life</td><td>Stevie Wonder</td><td>10,0</td><td>Black Man</td><td>1976</td></tr>
+<tr><td>Animals</td><td>Pink Floyd</td><td>10,0</td><td>Pigs (Three Different Ones)</td><td>1977</td></tr>
+<tr><td>loveless</td><td>my bloody valentine</td><td>10,0</td><td>sometimes</td><td>1991</td></tr>
+<tr><td>Laughing Stock</td><td>Talk Talk</td><td>10,0</td><td>Taphead</td><td>1991</td></tr>
+<tr><td>Bone Machine</td><td>Tom Waits</td><td>10,0</td><td>Goin&#x27; out West</td><td>1992</td></tr>
+<tr><td>In Utero</td><td>Nirvana</td><td>10,0</td><td>Pennyroyal Tea</td><td>1993</td></tr>
+<tr><td>Homogenic</td><td>Björk</td><td>10,0</td><td>Jóga</td><td>1997</td></tr>
+<tr><td>F# A# ∞</td><td>Godspeed You! Black Emperor</td><td>10,0</td><td>Nervous, Sad, Poor …</td><td>1997</td></tr>
+<tr><td>When The Pawn…</td><td>Fiona Apple</td><td>10,0</td><td>Paper Bag</td><td>1999</td></tr>
+<tr><td>Lift Yr. Skinny Fists Like   Antennas To Heaven</td><td>Godspeed You! Black Emperor</td><td>10,0</td><td>Sleep</td><td>2000</td></tr>
+<tr><td>Toxicity</td><td>System of a Down</td><td>10,0</td><td>Toxicity</td><td>2001</td></tr>
+<tr><td>Madvillainy</td><td>MF DOOM &amp; Madlib</td><td>10,0</td><td>Strange Ways</td><td>2004</td></tr>
+<tr><td>Deathconsciousness</td><td>Have A Nice Life</td><td>10,0</td><td>Bloodhail</td><td>2008</td></tr>
+<tr><td>The Money Store</td><td>Death Grips</td><td>10,0</td><td>I&#x27;ve Seen Footage</td><td>2012</td></tr>
+<tr><td>To Pimp A Butterfly</td><td>Kendrick Lamar</td><td>10,0</td><td>u</td><td>2015</td></tr>
+<tr><td>The Glowing Man</td><td>Swans</td><td>10,0</td><td>The Glowing Man</td><td>2016</td></tr>
+<tr><td>Dead Magic</td><td>Anna von Hausswolff</td><td>10,0</td><td>Ugly and Vengeful</td><td>2018</td></tr>
+<tr><td>Promises</td><td>Floating Points, Pharoah Sanders &amp; The London Symphony   Orchestra</td><td>10,0</td><td>Movement 6</td><td>2021</td></tr>
+</tbody>
+</table>
+</div>
+</main>
+<script>
+const input = document.getElementById('search');
+const body = document.getElementById('rows');
+const count = document.getElementById('count');
+const allRows = [...body.rows];
+function filterRows() {
+  const q = input.value.toLocaleLowerCase('de').trim();
+  let visible = 0;
+  for (const row of allRows) {
+    const match = !q || row.innerText.toLocaleLowerCase('de').includes(q);
+    row.hidden = !match;
+    if (match) visible++;
+  }
+  count.textContent = `${visible.toLocaleString('de')} von ${allRows.length.toLocaleString('de')} Alben`;
+}
+input.addEventListener('input', filterRows);
+document.getElementById('reset').addEventListener('click', () => {
+  input.value = '';
+  filterRows();
+  input.focus();
+});
+filterRows();
+</script>
+</body>
+</html>
